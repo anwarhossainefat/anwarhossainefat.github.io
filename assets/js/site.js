@@ -16,10 +16,10 @@
   function labelButton(btn) {
     var dark = isDark();
     btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-    btn.setAttribute('title', dark ? 'Dark theme (click for light)' : 'Light theme (click for dark)');
-    /* The icon shows the current theme: sun in light mode, moon in dark mode. */
-    show(btn.querySelector('.i-sun'), !dark);
-    show(btn.querySelector('.i-moon'), dark);
+    btn.setAttribute('title', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    /* The icon shows the theme you switch to: moon in light mode, sun in dark mode. */
+    show(btn.querySelector('.i-sun'), dark);
+    show(btn.querySelector('.i-moon'), !dark);
   }
 
   var btn = document.querySelector('.theme-btn');

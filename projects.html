@@ -44,7 +44,7 @@
 </header>
 <div class="cards">
   <article class="card" id="deltadraw">
-  <div class="card-media"><img src="assets/img/projects/deltadraw.jpg" alt="DeltaDraw running a DFA for binary numbers divisible by 3, one step at a time" loading="lazy" width="800" height="500"></div>
+  <div class="card-media"><img src="assets/img/projects/deltadraw.jpg" alt="DeltaDraw running a DFA for binary numbers divisible by 3, one step at a time" loading="lazy" width="1200" height="750"></div>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-HCI" title="Human–Computer Interaction">HCI</span><span class="tag tag-SE" title="Software Engineering">SE</span><span class="badge status">Open source</span><span class="badge">Released Oct 2026</span></div>
     <h3>DeltaDraw</h3>
@@ -61,24 +61,24 @@
   </div>
 </article>
   <article class="card" id="germophobia">
-  <div class="card-media"><img src="assets/img/projects/germophobia.svg" alt="Gamified VR exposure therapy game for germophobia" loading="lazy" width="800" height="500"></div>
+  <div class="card-media"><img src="assets/img/projects/germophobia.jpg" alt="Desktop version of the germophobia game: a player in a night-time city park, with a live 80 BPM heart-rate readout and a minimap" loading="lazy" width="1200" height="674"></div>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-HCI" title="Human–Computer Interaction">HCI</span><span class="tag tag-XR" title="AR/VR & Games">XR</span><span class="badge status">MS thesis</span></div>
     <h3>Germophobia Exposure-Therapy Game</h3>
-    <p class="card-people">VR and Android serious game</p>
-    <p>A serious game that guides players through graded exposure to germ-related situations. A companion smartwatch app streams the player’s heart rate to the game in real time, and the player’s choices change how the environment responds.</p>
+    <p class="card-people">Desktop, Android, and VR (in development) serious game</p>
+    <p>A serious game that guides players through graded exposure to germ-related situations. A companion smartwatch app streams the player’s heart rate to the game in real time, shown live on screen, and the player’s choices change how the environment responds.</p>
     <ul class="tools"><li>Unity</li><li>C#</li><li>Android SDK</li><li>Smartwatch app</li><li>Firebase</li></ul>
     <div class="card-actions"><a class="btn ghost" href="research.html#germophobia">About the research</a></div>
   </div>
 </article>
-  <article class="card" id="hpc">
-  <div class="card-media"><img src="assets/img/projects/hpc-timetabling.svg" alt="A graph coloured with four colours and split across three processes" loading="lazy" width="800" height="500"></div>
+  <article class="card card-wide" id="hpc">
+  <a class="card-media" href="assets/img/projects/hpc-timetabling-full.jpg" target="_blank" rel="noopener" title="Open full-size image"><img src="assets/img/projects/hpc-timetabling.jpg" alt="Project overview: student enrollments, a course conflict graph, parallel colouring across ranks, and the resulting exam timetable, with four constraints and three parallel models" loading="lazy" width="1200" height="675"><span class="zoom">View full size</span></a>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-HPC" title="High-Performance Computing">HPC</span><span class="badge status">Course project</span><span class="badge">CS 5570</span></div>
-    <h3>Parallel Examination Timetabling</h3>
-    <p class="card-people">MPI-based graph colouring under incrementally introduced constraints</p>
-    <p>Models exam timetabling as graph colouring and builds an MPI solver based on Jones–Plassmann parallel colouring. Room-capacity and minimum-gap constraints are added one at a time, the inter-process dependencies each one introduces are resolved, and strong and weak scaling are analysed at every phase. Results are validated on a public benchmark (Carter/Toronto or ITC2007).</p>
-    <ul class="tools"><li>C</li><li>MPI</li><li>Jones–Plassmann colouring</li><li>Strong and weak scaling</li></ul>
+    <h3>Parallel Exam Timetabling</h3>
+    <p class="card-people">Scheduling exams for a million students with parallel graph colouring</p>
+    <p>Courses become nodes in a conflict graph, and colouring the graph assigns exam days so no student has two exams on the same day. The solver runs with MPI, OpenMP, and a hybrid of both. Four constraints are added one at a time: no conflicts on the same day, a daily capacity, at least two days between conflicting exams, and room matching. Scaling and time breakdowns are measured after each one, on a synthetic university of one million students and on the Toronto benchmark, and every schedule is verified.</p>
+    <ul class="tools"><li>C</li><li>MPI</li><li>OpenMP</li><li>SLURM</li><li>Up to 256 cores</li></ul>
     
   </div>
 </article>

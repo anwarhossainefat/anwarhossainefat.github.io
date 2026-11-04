@@ -47,35 +47,35 @@
   <h2 id="current">Current projects</h2>
   <div class="cards">
     <article class="card" id="germophobia">
-  <div class="card-media"><img src="assets/img/projects/germophobia.svg" alt="Gamified VR exposure therapy game for germophobia" loading="lazy" width="800" height="500"></div>
+  <div class="card-media"><img src="assets/img/projects/germophobia.jpg" alt="Desktop version of the germophobia game: a player in a night-time city park, with a live 80 BPM heart-rate readout and a minimap" loading="lazy" width="1200" height="674"></div>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-HCI" title="Human–Computer Interaction">HCI</span><span class="tag tag-XR" title="AR/VR & Games">XR</span><span class="badge status">MS thesis</span><span class="badge status">IRB-approved</span></div>
     <h3>Gamified VR and Android Exposure Therapy for Germophobia</h3>
     <p class="card-people">Supervisor: Dr. Farjana Z. Eishita, Idaho State University</p>
-    <p>A VR and Android serious game that delivers graded exposure therapy for germophobia. The game syncs with the player’s heart rate in real time through a smartwatch, and branching player choices change how elements of the environment respond. We will evaluate it in an IRB-approved user study.</p>
+    <p>A serious game that delivers graded exposure therapy for germophobia. The desktop and Android versions are built, and the VR version is in development. The game syncs with the player’s heart rate in real time through a smartwatch, and branching player choices change how elements of the environment respond. We will evaluate it in an IRB-approved user study.</p>
     <ul class="tools"><li>Unity</li><li>C#</li><li>Android SDK</li><li>Smartwatch heart-rate sync</li><li>Firebase</li></ul>
     <div class="card-actions"><a class="btn ghost" href="https://doi.org/10.1109/IETC69527.2026.11568637" target="_blank" rel="noopener">Usability study (i-ETC 2026)</a></div>
   </div>
 </article>
-    <article class="card" id="ai-pull-requests">
-  <div class="card-media"><img src="assets/img/projects/ai-pull-requests.svg" alt="Illustration of an AI-authored pull request and comments marked by sentiment" loading="lazy" width="800" height="500"></div>
+    <article class="card card-wide" id="ai-pull-requests">
+  <a class="card-media" href="assets/img/projects/ai-pull-requests-full.jpg" target="_blank" rel="noopener" title="Open full-size image"><img src="assets/img/projects/ai-pull-requests.jpg" alt="Study overview: agentic pull requests from six AI coding agents, a toxicity check with two detectors and manual review, sentence-level sentiment with RoBERTa, and comparisons across agents, task types, expertise and author groups" loading="lazy" width="1200" height="675"><span class="zoom">View full size</span></a>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-SE" title="Software Engineering">SE</span><span class="badge status">In preparation</span></div>
-    <h3>Toxicity and Sentiment Around AI Pull Requests</h3>
+    <h3>Merge or Malice? Toxicity and Sentiment Around AI Agent Pull Requests</h3>
     <p class="card-people">Advisor: Dr. Minhaz F. Zibran, Idaho State University</p>
-    <p>AI coding agents now open pull requests on real projects. Our EASE 2026 paper measured toxicity in the discussions around them. The invited journal extension for <em>Information and Software Technology</em> enlarges the dataset of AI pull requests, replicates the toxicity analysis on it, and adds RoBERTa-based sentiment analysis of the surrounding discussions.</p>
-    <ul class="tools"><li>GitHub REST API</li><li>GitHub GraphQL API</li><li>Toxicity analysis</li><li>RoBERTa</li></ul>
+    <p>AI coding agents such as OpenAI Codex, GitHub Copilot, Claude Code, Devin, Cursor and Google Jules now open pull requests on real projects. Our EASE 2026 paper studied toxic comments around them. The invited journal extension for <em>Information and Software Technology</em> studies two levels of reaction on a much larger dataset: toxicity, found with two detectors and a manual review of every flagged comment, and everyday sentiment, classified with a fine-tuned RoBERTa model.</p>
+    <ul class="tools"><li>GitHub REST & GraphQL APIs</li><li>ToxiCR</li><li>ToxiShield</li><li>RoBERTa</li><li>Python</li><li>PyTorch</li></ul>
     
   </div>
 </article>
-    <article class="card" id="xr-privacy">
-  <div class="card-media"><img src="assets/img/projects/xr-privacy.svg" alt="Illustration of a VR headset sending telemetry and a privacy policy" loading="lazy" width="800" height="500"></div>
+    <article class="card card-wide" id="xr-privacy">
+  <a class="card-media" href="assets/img/projects/xr-privacy-full.jpg" target="_blank" rel="noopener" title="Open full-size image"><img src="assets/img/projects/xr-privacy.jpg" alt="Study overview: app selection on the Meta Quest Store, policy retrieval, manual coding with a six-variable codebook, and analysis of whether protections match data sensitivity" loading="lazy" width="1200" height="675"><span class="zoom">View full size</span></a>
   <div class="card-body">
     <div class="card-badges"><span class="tag tag-XR" title="AR/VR & Games">XR</span><span class="tag tag-SEC" title="Security & Privacy">SEC</span><span class="badge status">Under review</span></div>
     <h3>Sensitive Telemetry, Generic Protections</h3>
     <p class="card-people">A manual audit of the privacy policies of health, fitness, and mental wellness apps on the Meta Quest Store</p>
-    <p>VR headsets can capture body movement, gaze, voice, and health-related signals. This audit examines how health, fitness, and mental wellness apps on the Meta Quest Store disclose that telemetry and what protections they promise. It builds on our systematic literature review of cybersecurity threats in VR games (ICCSIT 2026).</p>
-    <ul class="tools"><li>Manual privacy-policy audit</li><li>Systematic literature review</li></ul>
+    <p>VR headsets can capture body movement, gaze, voice, and health-related signals. We read the privacy policies of 100 health, fitness, and mental wellness apps on the Meta Quest Store and coded each one with a six-variable codebook: what sensitive telemetry it collects, whether it shares data with advertisers, whether it mentions HIPAA or medical privacy, and whether users can delete their data. The study asks whether stated protections match the sensitivity of the data. It builds on our systematic literature review of cybersecurity threats in VR games (ICCSIT 2026).</p>
+    <ul class="tools"><li>Directed content analysis</li><li>Codebook design</li><li>Statistical analysis</li><li>Python</li></ul>
     
   </div>
 </article>

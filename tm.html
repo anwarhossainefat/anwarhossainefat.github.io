@@ -1,0 +1,2795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turing Machine Simulator – Draw and Run a TM Step by Step | DeltaDraw</title>
+<meta name="description" content="Turing machine simulator: draw a TM with Sipser's 0→x,R labels and watch it run on the tape step by step, with configurations, the formal definition and Sipser's examples. Export PNG, SVG, LaTeX or JFLAP.">
+<link rel="canonical" href="https://anwarhossainefat.github.io/deltadraw/tm.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Turing Machine Simulator – Draw and Run a TM Step by Step | DeltaDraw">
+<meta property="og:description" content="Turing machine simulator: draw a TM with Sipser's 0→x,R labels and watch it run on the tape step by step, with configurations, the formal definition and Sipser's examples. Export PNG, SVG, LaTeX or JFLAP.">
+<meta property="og:url" content="https://anwarhossainefat.github.io/deltadraw/tm.html">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#2a55c9">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232a55c9'/%3E%3Ctext x='32' y='45' font-family='Times New Roman,serif' font-style='italic' font-size='42' text-anchor='middle' fill='white'%3E%CE%B4%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,500;1,400;1,500&display=swap">
+</head>
+<body>
+<style>
+/* Layout: toolbar band on top, drawing stage left, inspector panel right (stacks under the stage on phones); about/how-to text below the fold */
+:root{
+  --bg:#f2f4f8;
+  --surface:#ffffff;
+  --surface-2:#eef1f6;
+  --ink:#151922;
+  --muted:#5a6375;
+  --line:#d7dce5;
+  --accent:#2a55c9;
+  --accent-ink:#ffffff;
+  --accent-soft:#e3eafb;
+  --hl:#c27400;
+  --hl-soft:#ffefcc;
+  --ok:#1a7a45;
+  --ok-soft:#dff2e6;
+  --bad:#b8321f;
+  --bad-soft:#fbe4e0;
+  --stage:#fbfcfe;
+  --grid:#c9d1de;
+  --start-fill:#d4e1ff;
+  --accept-fill:#cdeedb;
+  --shadow:0 10px 30px rgba(20,28,45,.14);
+  --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --font-math:"STIX Two Text","Times New Roman",Times,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1117; --surface:#161a22; --surface-2:#1d222c; --ink:#e5e8ee; --muted:#97a0b0; --line:#2b313d;
+    --accent:#86a6ff; --accent-ink:#0e1117; --accent-soft:#1f2944;
+    --hl:#f2a93b; --hl-soft:#3b2d12; --ok:#55c98a; --ok-soft:#163323; --bad:#ff8173; --bad-soft:#3d1c18;
+    --stage:#11151c; --grid:#2a313d; --shadow:0 10px 30px rgba(0,0,0,.5);
+    --start-fill:#1e2a47; --accept-fill:#173322;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1117; --surface:#161a22; --surface-2:#1d222c; --ink:#e5e8ee; --muted:#97a0b0; --line:#2b313d;
+  --accent:#86a6ff; --accent-ink:#0e1117; --accent-soft:#1f2944;
+  --hl:#f2a93b; --hl-soft:#3b2d12; --ok:#55c98a; --ok-soft:#163323; --bad:#ff8173; --bad-soft:#3d1c18;
+  --stage:#11151c; --grid:#2a313d; --shadow:0 10px 30px rgba(0,0,0,.5);
+  --start-fill:#1e2a47; --accept-fill:#173322;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--font-ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Site menu (chapters), shared by every page except exam mode ---------- */
+.sitenav{
+  display:flex;align-items:center;gap:6px 18px;min-height:40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;
+}
+.sitenav-brand{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink);text-decoration:none;white-space:nowrap}
+.mini-delta{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font:italic 500 15px/1 var(--font-math);padding-bottom:2px}
+.sitenav-links{display:flex;gap:2px;overflow-x:auto;min-width:0;scrollbar-width:none;flex:1}
+.sitenav-links::-webkit-scrollbar{display:none}
+.nav-item{display:inline-flex;align-items:center;gap:6px;padding:10px 9px 8px;color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+a.nav-item:hover{color:var(--ink)}
+.nav-item.active{color:var(--ink);border-bottom-color:var(--accent)}
+.nav-item.soon{opacity:.5;cursor:default}
+.nav-ch{font:500 11px var(--font-mono);color:var(--muted);letter-spacing:.02em}
+
+/* ---------- App shell ---------- */
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:560px}
+.topbar{
+  display:flex;align-items:center;gap:12px 18px;flex-wrap:wrap;
+  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--surface);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;margin-right:6px}
+.brand-delta{
+  width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
+  background:var(--accent);color:var(--accent-ink);
+  font:italic 500 24px/1 var(--font-math);padding-bottom:3px;
+}
+.brand-text{display:grid;line-height:1.1}
+.brand-name{margin:0;font:600 17px/1.1 var(--font-ui);letter-spacing:-.01em}
+.brand-sub{margin:0;font-size:11.5px;color:var(--muted)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1}
+.toolbar .spacer{flex:1}
+.group{display:inline-flex;gap:4px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:34px;padding:0 11px;border:1px solid var(--line);border-radius:7px;
+  background:var(--surface);color:var(--ink);font:500 13px/1 var(--font-ui);cursor:pointer;white-space:nowrap;
+  text-decoration:none;
+}
+.gate{width:min(440px,100%);height:auto;align-self:center}
+.gate .input{height:auto}
+.code-chip{font:600 13px var(--font-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;letter-spacing:.04em}
+.input.code-field{text-transform:uppercase;letter-spacing:.06em}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.42;cursor:default;background:var(--surface)}
+.btn svg{width:16px;height:16px;flex:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad)}
+.btn.small{height:28px;padding:0 9px;font-size:12px}
+.btn.icon{width:34px;padding:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg .btn{border:0;border-radius:0;height:32px}
+.seg .btn+.btn{border-left:1px solid var(--line)}
+.seg .btn[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.select{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:0 8px;font:500 13px var(--font-ui);cursor:pointer}
+
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.stage{position:relative;overflow:hidden;background:var(--stage);min-height:0}
+#canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;outline:none}
+.hint{
+  position:absolute;left:12px;bottom:12px;max-width:calc(100% - 210px);
+  font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);
+  border-radius:7px;padding:6px 10px;pointer-events:none;
+}
+.zoom{position:absolute;right:12px;bottom:12px;display:flex;align-items:center}
+.welcome{position:absolute;inset:0;display:grid;place-items:center;padding:16px 16px 80px;pointer-events:none}
+.welcome-card{pointer-events:auto;text-align:center;display:grid;justify-items:center;gap:10px;max-width:360px;padding:26px 24px;border:1.5px dashed var(--line);border-radius:14px;background:var(--surface)}
+.welcome-card h2{margin:4px 0 0;font:500 24px/1.2 var(--font-math)}
+.welcome-card p{margin:0;color:var(--muted);font-size:14px}
+.welcome-card .row{justify-content:center;margin-top:6px}
+.swatch{display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ink);vertical-align:-1px;margin:0 2px}
+.swatch.start{background:var(--start-fill)}
+.swatch.accept{background:var(--accept-fill)}
+.zoom .btn{height:30px;min-width:30px;padding:0 8px;font-variant-numeric:tabular-nums}
+.zoom-level{min-width:54px}
+
+/* ---------- Inspector panel ---------- */
+.panel{background:var(--surface);border-left:1px solid var(--line);overflow:auto;display:flex;flex-direction:column;min-height:0}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.sec-title{margin:0;font:600 11px/1 var(--font-ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.small-text{font-size:12.5px;margin:0}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.field{display:grid;gap:5px;font-size:12px;color:var(--muted)}
+.input,textarea.input{
+  width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--ink);
+  padding:7px 10px;font:15px/1.35 var(--font-mono);
+}
+.input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+textarea.input{resize:vertical;font-size:14px}
+.checks{display:grid;gap:6px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--accent);margin:0}
+.symbols{display:flex;gap:4px;flex-wrap:wrap}
+.symbols .btn{height:26px;min-width:30px;padding:0 7px;font:italic 15px/1 var(--font-math)}
+.symbols .btn.plain{font:500 11.5px/1 var(--font-ui)}
+
+.machine-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.type-badge{font:600 12px/1 var(--font-mono);padding:5px 9px;border-radius:999px;letter-spacing:.04em}
+.type-badge.dfa{background:var(--ok-soft);color:var(--ok)}
+.type-badge.nfa{background:var(--accent-soft);color:var(--accent)}
+.type-badge.none{background:var(--surface-2);color:var(--muted)}
+.sigma{font:15px var(--font-math);margin:0}
+.notes{margin:0;padding-left:18px;display:grid;gap:3px;font-size:12.5px;color:var(--muted)}
+.notes li.warn{color:var(--bad)}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);padding:0 8px;position:sticky;top:0;background:var(--surface);z-index:1}
+.tab{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:11px 6px 9px;font:500 13px var(--font-ui);color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabpanel{padding:14px 16px 20px;display:grid;gap:12px;align-content:start}
+
+.tape{display:flex;flex-wrap:wrap;gap:3px;font:14px var(--font-mono)}
+.cell{min-width:24px;height:28px;padding:0 5px;display:grid;place-items:center;border:1px solid var(--line);border-radius:4px;background:var(--surface-2)}
+.cell.done{color:var(--muted);opacity:.7}
+.cell.cur{border-color:var(--hl);background:var(--hl-soft);color:var(--ink);font-weight:500}
+.cell.eps{font-family:var(--font-math);font-style:italic}
+.sim-out{display:grid;gap:8px}
+.sim-line{font-size:13px}
+.math{font-family:var(--font-math);font-size:15px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 var(--font-ui);padding:6px 10px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.run{background:var(--hl-soft);color:var(--hl)}
+details.batch{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+details.batch summary{cursor:pointer;font-weight:500;font-size:13px}
+details.batch[open] summary{margin-bottom:8px}
+.batch-body{display:grid;gap:8px}
+.batch-out{list-style:none;margin:0;padding:0;display:grid;gap:4px;font:13px var(--font-mono)}
+.batch-out li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:3px 0}
+.batch-out .ok{color:var(--ok)} .batch-out .bad{color:var(--bad)}
+
+.conv-card{border:1px solid var(--line);border-radius:9px;padding:12px;display:grid;gap:8px}
+.conv-card h3{margin:0;font:600 14px var(--font-ui)}
+.conv-card p{margin:0;font-size:12.5px;color:var(--muted)}
+.result-note{font-size:12.5px;margin:0;padding:8px 10px;border-radius:7px;background:var(--surface-2)}
+.walk-list{margin:8px 0 0;padding-left:18px;display:grid;gap:4px;font-size:13.5px}
+.re-input{font:italic 18px var(--font-math);letter-spacing:.02em}
+.re-read{margin:0;min-height:1.4em}
+.re-read .math{font-size:16px}
+.re-read.err{color:var(--bad)}
+.re-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.re-opts .select{width:100%;height:32px}
+.re-opts .input{font-size:13px;padding:5px 8px}
+.re-out{display:grid;gap:6px}
+.re-out .chips{display:flex;flex-wrap:wrap;gap:4px}
+.re-out .chip{font:14px var(--font-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 7px}
+.regex-result{font:italic 17px var(--font-math);word-break:break-word;background:var(--surface-2);border-radius:6px;padding:6px 9px}
+.app[data-page="regex"] #tab-regex{order:-1}
+/* practice page: no solving tools, just drawing, Test and Table */
+.app[data-page="practice"] #tab-convert,.app[data-page="practice"] #tab-combine,.app[data-page="practice"] #tab-regex,
+.app[data-page="practice"] #examples,.app[data-page="practice"] #btn-exam,.app[data-page="practice"] #welcome-example,
+.app[data-page="practice"] #btn-open{display:none}
+.ex-sec{background:var(--surface)}
+.ex-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ex-nav{display:flex;gap:4px}
+.ex-nav .select{flex:1;min-width:0;width:0;height:32px}
+.ex-nav .btn{height:32px;width:32px}
+.ex-card{display:grid;gap:9px;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg)}
+.ex-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ex-card h3{margin:0;font:600 15.5px/1.3 var(--font-ui)}
+.ex-text{margin:0;font-size:14px;line-height:1.55}
+.ex-text .lbl{font:italic 16px var(--font-math)}
+.ex-rules{margin:0}
+.ex-figure{border:1px solid var(--line);border-radius:8px;background:var(--stage);padding:6px;color:var(--ink)}
+.ex-figure svg{display:block;width:100%;height:auto;max-height:200px}
+.ex-hints{margin:0;padding-left:18px;display:grid;gap:5px;font-size:13px}
+.ex-hints:empty{display:none}
+.slots{display:grid;gap:8px}
+.slot{border:1px solid var(--line);border-radius:9px;padding:9px 10px;display:grid;gap:8px}
+.slot-head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.slot-head b{font:600 15px var(--font-mono)}
+.eq-out{display:grid;gap:6px;justify-items:start}
+
+/* ---------- Step-by-step walkthrough card (over the canvas) ---------- */
+.walk{position:absolute;left:12px;right:12px;bottom:52px;max-height:min(48%,440px);overflow:auto;z-index:3;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;display:grid;gap:10px}
+.walk-head{display:flex;align-items:center;gap:10px}
+.walk-head strong{flex:1;font-size:14px}
+.walk-text{margin:0;font-size:14px;line-height:1.6;max-width:90ch}
+.walk-text .lbl,.walk-text b.lbl{font:italic 16px var(--font-math)}
+.grow{flex:1}
+.ttable td.cur{background:var(--hl-soft);box-shadow:inset 0 0 0 2px var(--hl)}
+.ttable tr.newrow td.state{background:var(--accent-soft)}
+.walk .ttable{min-width:0;width:auto}
+.ttable.pairs{min-width:0}
+.ttable.pairs td{min-width:42px;height:30px}
+.ttable.pairs td.void{border:0;background:transparent}
+.ttable.pairs th{background:transparent;border:0;font-family:var(--font-math);font-style:italic;font-size:15px}
+.mk{color:var(--bad);font-weight:600}
+.mk sub{font:500 10px var(--font-mono)}
+@media (max-width: 860px){ .walk{bottom:12px;max-height:62%} }
+
+.table-wrap{overflow-x:auto}
+.ttable{border-collapse:collapse;font:13px var(--font-mono);min-width:100%}
+.ttable th,.ttable td{border:1px solid var(--line);padding:5px 9px;text-align:center;white-space:nowrap}
+.ttable th{background:var(--surface-2);font-weight:500}
+.ttable .lbl{font-family:var(--font-math);font-style:italic;font-size:15px}
+.ttable td.state{text-align:left}
+.ttable .mark{color:var(--muted);font-style:normal;font-family:var(--font-mono);font-size:12px;margin-right:4px}
+
+/* ---------- Practice inside the PDA and TM pages ---------- */
+.pr-banner{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--accent-soft);border-radius:8px;padding:7px 10px;font-size:13px}
+.pr-banner .grow{flex:1}
+/* ---------- Turing machines ---------- */
+.tm-tape{display:flex;flex-wrap:nowrap;gap:3px;overflow-x:auto;padding:16px 2px 4px;scrollbar-width:thin}
+.tm-tape .cell{position:relative;min-width:28px;text-align:center}
+.tm-tape .cell.blank{color:var(--muted)}
+.tm-tape .cell.head{background:var(--hl-soft);border-color:var(--hl);box-shadow:inset 0 0 0 1px var(--hl)}
+.tm-tape .cell.head::before{content:"▼";position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--hl)}
+.tm-trace{margin:0;padding-left:28px;display:grid;gap:2px;font:15px/1.5 var(--font-math);max-height:280px;overflow:auto}
+.tm-trace li.cur{background:var(--hl-soft);border-radius:4px}
+.tm-trace .st{font-style:italic;color:var(--accent);margin:0 3px}
+.cfg-line{font:16px var(--font-math)}
+.cfg-line .st{font-style:italic;color:var(--accent);margin:0 3px}
+/* ---------- Pushdown automata ---------- */
+.pda-run{display:flex;gap:14px;align-items:flex-start}
+.pda-run .sim-lines{display:grid;gap:6px;min-width:0;flex:1}
+.pda-stack{display:flex;flex-direction:column;align-items:stretch;min-width:48px;flex:none}
+.pda-stack .cap{font:600 10.5px var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:3px}
+.pda-stack .well{display:flex;flex-direction:column;border:1.5px solid var(--ink);border-top:0;border-radius:0 0 6px 6px;min-height:34px;justify-content:flex-end}
+.pda-stack .sc{font:italic 17px/1.2 var(--font-math);text-align:center;padding:3px 10px;border-top:1px solid var(--line)}
+.pda-stack .sc.top{background:var(--hl-soft);border-top-color:var(--hl)}
+.pda-stack .sc.more{font:12px var(--font-ui);color:var(--muted);font-style:normal}
+.pda-stack .none{font:12px var(--font-ui);color:var(--muted);text-align:center;padding:8px 4px}
+.move{font-size:13px}
+.trace td.cur{background:var(--hl-soft);box-shadow:none}
+.trace{font-size:12.5px}
+.trace th,.trace td{text-align:left;padding:4px 7px}
+.trace .lbl{font-size:14.5px}
+.pda-def{display:grid;gap:3px;font-size:13.5px}
+.pda-def .math{font-size:15px}
+/* ---------- Modals & toast ---------- */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(10,14,22,.5)}
+.dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(780px,100%);max-height:calc(100dvh - 32px);overflow:auto;display:grid;grid-template-rows:auto 1fr}
+.dialog-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.dialog-head h2{margin:0;font:600 16px var(--font-ui);flex:1}
+.dialog-body{padding:16px;display:grid;gap:14px;min-width:0;align-content:start}
+.preview{border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:46vh;display:grid;place-items:center;padding:12px;
+  background-color:#fff;background-image:linear-gradient(45deg,#e9ecf1 25%,transparent 25%),linear-gradient(-45deg,#e9ecf1 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e9ecf1 75%),linear-gradient(-45deg,transparent 75%,#e9ecf1 75%);
+  background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
+.preview img{max-width:100%;height:auto;display:block}
+.code{width:100%;min-height:220px;font:12.5px/1.45 var(--font-mono);border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:10px;resize:vertical;white-space:pre}
+.opt-row{display:flex;gap:14px 22px;flex-wrap:wrap;align-items:center;font-size:13px}
+.opt-row .label{color:var(--muted);font-size:12px}
+.radio{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.radio input{accent-color:var(--accent);margin:0}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;
+  display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--bg);border-radius:9px;padding:9px 12px 9px 14px;box-shadow:var(--shadow);font-size:13px;max-width:calc(100% - 32px)}
+.toast button{background:none;border:0;color:var(--bg);font-weight:600;text-decoration:underline;cursor:pointer;padding:2px 4px}
+
+/* ---------- About / how-to (below the app) ---------- */
+.about{max-width:1020px;margin:0 auto;padding-block:56px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
+.about h2{margin:0 0 10px;font:500 30px/1.15 var(--font-math);text-wrap:balance;letter-spacing:-.005em}
+.about h3{margin:0 0 6px;font:600 15px var(--font-ui)}
+.about p,.about li{font-size:15px;line-height:1.6;max-width:68ch}
+.about p{margin:0 0 10px}
+.lead{font-size:17px!important;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px 32px}
+.cols>div{min-width:0}
+.about ol,.about ul{margin:0;padding-left:20px;display:grid;gap:6px}
+kbd{font:500 12px var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--surface)}
+.syntax{border-collapse:collapse;font-size:14px;width:100%}
+.syntax td,.syntax th{border-bottom:1px solid var(--line);padding:7px 10px 7px 0;text-align:left;vertical-align:top}
+.syntax th{font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.syntax code{font:13px var(--font-mono);background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.syntax .out{font:italic 17px var(--font-math)}
+.faq dt{font-weight:600;margin-top:12px}
+.faq dd{margin:4px 0 0;color:var(--muted);max-width:68ch}
+.foot{border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--muted);display:flex;gap:8px 18px;flex-wrap:wrap}
+.foot a{color:var(--accent)}
+
+@media (max-width: 1020px){
+  .btn .lbl-wide{display:none}
+}
+@media (max-width: 860px){
+  .app{height:auto;min-height:0}
+  .workspace{grid-template-columns:1fr;grid-template-rows:64vh auto}
+  .panel{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .tabs{position:static}
+  .hint{max-width:calc(100% - 24px);bottom:52px}
+  .about h2{font-size:25px}
+}
+@media (max-width: 560px){
+  .topbar{gap:8px}
+  .brand-sub{display:none}
+  .toolbar{gap:6px}
+  .toolbar .spacer{display:none}
+  .btn{height:32px;padding:0 9px}
+  .btn.icon{width:32px}
+  .seg .btn{height:30px}
+  .select{height:32px;max-width:132px}
+  .hint{font-size:11.5px;padding:5px 8px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app" id="app">
+<nav class="sitenav" aria-label="Chapters"><a class="sitenav-brand" href="index.html"><span class="mini-delta" aria-hidden="true">δ</span>DeltaDraw</a><div class="sitenav-links"><a class="nav-item" href="fa.html"><span class="nav-ch">Ch 1</span>Finite automata</a><a class="nav-item" href="regex.html"><span class="nav-ch">Ch 1</span>Regular expressions</a><a class="nav-item" href="pumping.html"><span class="nav-ch">Ch 1–2</span>Pumping lemma</a><a class="nav-item" href="cfg.html"><span class="nav-ch">Ch 2</span>Grammars</a><a class="nav-item" href="pda.html"><span class="nav-ch">Ch 2</span>Pushdown automata</a><a class="nav-item active" aria-current="page" href="tm.html"><span class="nav-ch">Ch 3</span>Turing machines</a><a class="nav-item" href="decide.html"><span class="nav-ch">Ch 4–5</span>Decidability</a><a class="nav-item" href="complexity.html"><span class="nav-ch">Ch 7</span>Complexity</a><a class="nav-item" href="practice.html"><span class="nav-ch">Ch 1</span>Practice</a></div></nav>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-delta" aria-hidden="true">δ</span>
+      <div class="brand-text">
+        <h1 class="brand-name">Turing machines</h1>
+        <p class="brand-sub">TM simulator · Chapter 3.1</p>
+      </div>
+    </div>
+
+    <div class="toolbar" role="toolbar" aria-label="Drawing tools">
+      <div class="seg" role="group" aria-label="Tool">
+        <button class="btn" id="tool-select" data-tool="select" aria-pressed="true" title="Select and move. Drag empty space to pan.">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2l9.5 5.2-4.2 1.1L6.6 12.5z"/></svg>
+          <span>Select</span>
+        </button>
+        <button class="btn" id="tool-state" data-tool="state" aria-pressed="false" title="Add states: click on the canvas">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg>
+          <span>State</span>
+        </button>
+        <button class="btn" id="tool-link" data-tool="link" aria-pressed="false" title="Add transitions: drag from one state to another">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C5 4 10 4 13.5 8.5"/><path d="M14 5v4h-4"/></svg>
+          <span>Transition</span>
+        </button>
+      </div>
+
+      <div class="group">
+        <button class="btn icon" id="btn-undo" title="Undo (Ctrl+Z)" aria-label="Undo">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 3.5L2.5 6.5l3 3"/><path d="M2.5 6.5H10a3.5 3.5 0 010 7H7"/></svg>
+        </button>
+        <button class="btn icon" id="btn-redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3.5l3 3-3 3"/><path d="M13.5 6.5H6a3.5 3.5 0 000 7h3"/></svg>
+        </button>
+        <button class="btn icon" id="btn-delete" title="Delete selected (Delete)" aria-label="Delete selected">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9"/></svg>
+        </button>
+      </div>
+
+      <div class="group">
+        <label class="sr-only" for="examples">Load an example</label>
+        <select class="select" id="examples">
+          <option value="">Examples…</option>
+          <option value="pow2">0 repeated 2ⁿ times (Sipser 3.7)</option>
+          <option value="wsharpw">w#w (Sipser 3.9)</option>
+          <option value="zeroone">0ⁿ1ⁿ</option>
+        </select>
+        <button class="btn" id="btn-new" title="Start a new empty drawing">New</button>
+        <button class="btn" id="btn-open" title="Open a saved DeltaDraw (.json) or JFLAP (.jff) file">Open</button>
+        <button class="btn" id="btn-save" title="Save the drawing as a file (Ctrl+S)">Save</button>
+        <input type="file" id="file-input" accept=".json,.jff,.xml,.png,application/json,image/png" hidden>
+      </div>
+
+      <span class="spacer"></span>
+
+      <div class="group">
+        <a class="btn" id="btn-exam" href="exam.html" target="_blank" rel="noopener" title="Open the drawing-only exam version in a new tab">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="2.5" width="10" height="11.5" rx="1.5"/><path d="M6 2.5h4v2H6zM5.5 8h5M5.5 10.8h3.5"/></svg>
+          Exam mode
+        </a>
+        <button class="btn icon" id="btn-theme" title="Theme: follows your system" aria-label="Change theme">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11" /><path d="M8 2.5a5.5 5.5 0 010 11z" fill="currentColor"/></svg>
+        </button>
+        <button class="btn icon" id="btn-help" title="How to use DeltaDraw" aria-label="How to use">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M6.3 6.2a1.8 1.8 0 113 1.4c-.7.4-1.3.8-1.3 1.6"/><circle cx="8" cy="11.4" r=".4" fill="currentColor"/></svg>
+        </button>
+        <button class="btn primary" id="btn-export" title="Export as PNG, SVG, LaTeX or JFLAP">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8M4.8 7.5L8 10.7l3.2-3.2M3 13.5h10"/></svg>
+          Export
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="stage" id="stage" aria-label="Drawing canvas">
+      <canvas id="canvas" tabindex="0" aria-label="Automaton drawing area"></canvas>
+      <div class="welcome" id="welcome" hidden>
+        <div class="welcome-card">
+          <span class="brand-delta" aria-hidden="true">δ</span>
+          <h2>Start your Turing machine</h2>
+          <p class="small-text">Label arrows like Sipser: <span class="math">0→x,R</span> reads 0, writes x and moves right; <span class="math">x→R</span> leaves x as it is.</p>
+          <p id="welcome-tip">Double-click anywhere on the canvas to add your first state.</p>
+          <div class="row">
+            <button class="btn primary" id="welcome-add">Add a state</button>
+            <button class="btn" id="welcome-example">Load an example</button>
+          </div>
+        </div>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="zoom seg">
+        <button class="btn" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+        <button class="btn zoom-level" id="zoom-level" title="Reset zoom to 100%">100%</button>
+        <button class="btn" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+        <button class="btn" id="zoom-fit" title="Fit drawing to screen">Fit</button>
+      </div>
+    </section>
+    <style>
+/* History dock (PDA stack history, TM tape history): a wide panel under the drawing; the inspector spans both rows */
+.workspace.has-dock{grid-template-rows:minmax(0,1fr) auto}
+.workspace.has-dock .stage{grid-column:1;grid-row:1}
+.workspace.has-dock .panel{grid-column:2;grid-row:1 / span 2}
+.hist-dock{grid-column:1;grid-row:2;min-width:0;background:var(--surface);border-top:1px solid var(--line)}
+.hist-head{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;padding:6px 12px 6px 6px}
+.hist-head h2{margin:0;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hist-sub{font-size:12.5px;color:var(--muted);min-width:0}
+.hist-sub b{color:var(--ink);font-weight:600}
+.hist-toggle{width:28px;height:28px;border:0;background:none;border-radius:6px;cursor:pointer;color:var(--muted);font-size:12px;display:grid;place-items:center}
+.hist-toggle:hover{background:var(--surface-2);color:var(--ink)}
+.hist-toggle[aria-expanded="false"] span{transform:rotate(-90deg)}
+.hist-toggle span{display:inline-block;transition:transform .12s}
+.hist-scroll{overflow-x:auto;overflow-y:hidden;position:relative;outline:none}
+.hist-scroll:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.hist-spacer{position:relative}
+#hist-canvas{position:sticky;left:0;top:0;display:block;cursor:pointer}
+.hist-scroll.both{overflow:auto}
+.hist-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;padding:4px 14px 8px;font-size:11.5px;color:var(--muted)}
+.hist-legend i{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin-right:5px;border:1.5px solid var(--ok);background:var(--ok-soft)}
+.hist-legend i.cur{border-color:var(--hl);background:transparent;box-shadow:inset 0 0 0 1px var(--hl)}
+.hist-legend i.pop{border:1.5px dashed var(--bad);background:transparent}
+.hist-legend i.head{border:2px solid var(--hl);background:var(--hl-soft)}
+@media (max-width: 860px){
+  .workspace.has-dock{grid-template-rows:64vh auto auto}
+  .workspace.has-dock .panel{grid-column:1;grid-row:3}
+  .hist-dock{grid-row:2}
+}
+    </style>
+    <section class="hist-dock" id="hist-dock" aria-labelledby="hist-title" hidden>
+      <div class="hist-head">
+        <button class="hist-toggle" id="hist-toggle" aria-expanded="true" aria-controls="hist-body" title="Show or hide the history"><span aria-hidden="true">▼</span></button>
+        <h2 id="hist-title">Tape history</h2>
+        <span class="hist-sub" id="hist-sub"></span>
+        <span class="grow"></span>
+        <button class="btn small" id="hist-png" title="Download the history as a PNG image">Download PNG</button>
+      </div>
+      <div id="hist-body">
+        <div class="hist-scroll both" id="hist-scroll" tabindex="0" aria-label="Tape history. Use the up and down arrow keys to move between steps."><div class="hist-spacer" id="hist-spacer"><canvas id="hist-canvas" aria-hidden="true"></canvas></div></div>
+        <p class="hist-legend"><span><i class="head"></i>head position</span><span><i></i>cell changed in this step</span><span><i class="cur"></i>current step</span><span>Click a row to jump to that step.</span></p>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Inspector">
+      <section class="sec" id="machine-sec" aria-live="polite">
+        <h2 class="sec-title">Automaton</h2>
+        <div id="machine-info"></div>
+        <div class="pr-banner" id="pr-banner" hidden></div>
+        <label class="check"><input type="checkbox" id="opt-color" checked> Color states: <span class="swatch start" aria-hidden="true"></span> start, <span class="swatch accept" aria-hidden="true"></span> accepting</label>
+      </section>
+
+      <section class="sec" id="sel-sec">
+        <h2 class="sec-title" id="sel-title">Selection</h2>
+        <p class="small-text muted" id="sel-empty">Nothing selected. Click a state or an arrow to edit it.</p>
+        <div id="sel-edit" class="checks" hidden>
+          <label class="field" for="sel-label" id="sel-label-wrap">Label
+            <input class="input" id="sel-label" type="text" autocomplete="off" spellcheck="false">
+          </label>
+          <div class="symbols" id="sel-symbols" aria-label="Insert symbol">
+            <button class="btn" data-ins="ε" title="Epsilon (empty move)">ε</button>
+            <button class="btn" data-ins="λ" title="Lambda">λ</button>
+            <button class="btn" data-ins="∅" title="Empty set">∅</button>
+            <button class="btn" data-ins="Σ" title="Sigma">Σ</button>
+            <button class="btn" data-ins="δ" title="Delta">δ</button>
+            <button class="btn" data-ins="→" title="Arrow, for PDA and Turing machine labels like a,b→c">→</button>
+            <button class="btn plain" data-ins="_" title="Subscript: q_1 becomes q₁">x₁</button>
+            <button class="btn" data-ins="␣" title="Blank tape symbol">␣</button>
+            <button class="btn plain" data-ins="; " title="Start another rule on the same arrow (drawn on a new line)">; new rule</button>
+          </div>
+          <p class="small-text muted" id="sel-help"></p>
+          <div class="checks" id="sel-node-opts">
+            <label class="check"><input type="checkbox" id="sel-accept"> Accepting state (double circle)</label>
+            <label class="check"><input type="checkbox" id="sel-initial"> Initial state (start arrow)</label>
+          </div>
+          <div class="row">
+            <button class="btn small" id="sel-straighten">Straighten arrow</button>
+            <button class="btn small danger" id="sel-del">Delete</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="tabs" role="tablist" aria-label="Tools">
+        <button class="tab" role="tab" id="tab-test" aria-controls="panel-test" aria-selected="true">Run</button>
+        <button class="tab" role="tab" id="tab-table" aria-controls="panel-table" aria-selected="false">Definition</button>
+        <button class="tab" role="tab" id="tab-practice" aria-controls="panel-practice" aria-selected="false">Practice</button>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-test" aria-labelledby="tab-test">
+        <label class="field" for="sim-input">Input string
+          <input class="input" id="sim-input" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. 0000 (empty = ε)">
+        </label>
+        <div class="row">
+          <button class="btn primary small" id="sim-run" title="Run to the end">Run</button>
+          <button class="btn small" id="sim-back" title="Previous step">◂ Back</button>
+          <button class="btn small" id="sim-step" title="Next step">Step ▸</button>
+          <button class="btn small" id="sim-play" title="Play the steps one after another">▶ Play</button>
+          <button class="btn small" id="sim-reset">Reset</button>
+        </div>
+        <div class="sim-out" id="sim-out" aria-live="polite"></div>
+        <details class="batch" id="trace-box" hidden>
+          <summary>Configurations</summary>
+          <div class="batch-body"><ol class="tm-trace" id="tm-trace"></ol></div>
+        </details>
+        <details class="batch">
+          <summary>Test many strings at once</summary>
+          <div class="batch-body">
+            <textarea class="input" id="batch-input" rows="5" spellcheck="false" placeholder="One string per line&#10;Type ε for the empty string"></textarea>
+            <div class="row"><button class="btn small" id="batch-run">Test all</button><span class="small-text muted" id="batch-sum"></span></div>
+            <ul class="batch-out" id="batch-out"></ul>
+          </div>
+        </details>
+        <label class="field" for="tm-limit">Stop after this many steps
+          <input class="input" id="tm-limit" type="number" min="10" max="1000000" step="10" value="10000">
+        </label>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-table" aria-labelledby="tab-table" hidden>
+        <p class="small-text muted">The formal definition (Sipser, Definition 3.3): the Turing machine is the 7-tuple (Q, Σ, Γ, δ, q₀, q_accept, q_reject).</p>
+        <div class="pda-def" id="pda-def"></div>
+        <div class="table-wrap" id="table-wrap"></div>
+        <div class="row"><button class="btn small" id="table-copy">Copy as Markdown</button><button class="btn small" id="table-copy-tex">Copy as LaTeX</button></div>
+      </div>
+      <div class="tabpanel" role="tabpanel" id="panel-practice" aria-labelledby="tab-practice" hidden>
+        <div class="ex-top"><h2 class="sec-title">Exercise</h2><span class="small-text muted" id="ex-progress"></span></div>
+        <div class="ex-nav">
+          <label class="sr-only" for="ex-pick">Choose an exercise</label>
+          <select class="select" id="ex-pick"></select>
+          <button class="btn icon" id="ex-prev" title="Previous exercise" aria-label="Previous exercise">◂</button>
+          <button class="btn icon" id="ex-next" title="Next exercise" aria-label="Next exercise">▸</button>
+        </div>
+        <div class="ex-card">
+          <div class="ex-meta"><span class="small-text muted" id="ex-sec-label"></span><span class="pill ok" id="ex-solved" hidden>✓ Solved</span></div>
+          <h3 id="ex-title"></h3>
+          <p class="ex-text" id="ex-text"></p>
+          <p class="small-text muted ex-rules" id="ex-rules"></p>
+          <div class="row"><button class="btn primary" id="ex-start">Draw it on the canvas</button></div>
+          <div class="row">
+            <button class="btn primary" id="ex-check">Check my drawing</button>
+            <button class="btn small" id="ex-hint">Hint</button>
+            <button class="btn small" id="ex-solution">Show a solution</button>
+          </div>
+          <ul class="ex-hints" id="ex-hints"></ul>
+          <div class="eq-out small-text" id="ex-feedback" aria-live="polite"></div>
+        </div>
+        <p class="small-text muted">Each exercise keeps its own drawing. Your own drawing comes back when you press <b>Stop practicing</b>.</p>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<section class="about" id="about">
+  <div>
+    <h2>Simulate Turing machines step by step</h2>
+    <p class="lead">A Turing machine reads and writes on an infinite tape and moves its head left or right (Sipser, Chapter 3.1). Draw one with Sipser's labels, watch it run on the tape one step at a time, read its configurations, and see its formal definition.</p>
+  </div>
+  <div class="cols" id="how-to">
+    <div>
+      <h3>Writing transition labels</h3>
+      <table class="syntax">
+        <thead><tr><th>Type</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td><code>0-&gt;x,R</code> or <code>0→x,R</code></td><td>read 0, write x, move right</td></tr>
+          <tr><td><code>x→R</code></td><td>read x, leave it, move right</td></tr>
+          <tr><td><code>0,1,x→L</code></td><td>the same move for each symbol listed</td></tr>
+          <tr><td><code>␣</code> (or <code>\blank</code>)</td><td>the blank symbol</td></tr>
+          <tr><td><code>L</code>, <code>R</code>, <code>S</code></td><td>move left, move right, stay put (S is a variant, not in Sipser's definition)</td></tr>
+          <tr><td><code>0→R; 1→L</code></td><td>two rules on one arrow, drawn on two lines</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>How the machine runs</h3>
+      <ol>
+        <li>The input is written on the tape from the first cell, the rest is blank, and the head starts on the first cell.</li>
+        <li>The machine accepts when it enters <strong>q_accept</strong> (a state with “accept” in its name, or drawn with a double circle) and rejects when it enters <strong>q_reject</strong>.</li>
+        <li>As in Sipser's diagrams, a missing transition means the machine goes to q_reject. Moving left from the first cell leaves the head where it is.</li>
+        <li>A machine may run forever. The page stops after the step limit you choose and says so, instead of guessing.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Configurations</h3>
+      <ol>
+        <li>A configuration <span class="math">u q v</span> means the tape holds uv, the state is q and the head is on the first symbol of v (Sipser, Section 3.1).</li>
+        <li>The <strong>Configurations</strong> list shows every step of a run, like Sipser's trace for Example 3.7.</li>
+        <li>For a nondeterministic machine, the page explores every branch and shows an accepting one.</li>
+      </ol>
+    </div>
+  </div>
+  <footer class="foot">
+    <span>DeltaDraw v1.8 · Turing machines</span>
+    <span>Follows Sipser, <em>Introduction to the Theory of Computation</em>, 3rd ed.</span>
+    <a href="index.html">All chapters</a>
+    <a href="pda.html">Pushdown automata</a>
+    <a href="fa.html">Finite automata</a>
+  </footer>
+</section>
+<div class="modal" id="export-modal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="export-title">
+    <div class="dialog-head">
+      <h2 id="export-title">Export</h2>
+      <div class="seg" role="tablist" aria-label="Export format">
+        <button class="btn" role="tab" data-fmt="png" aria-pressed="true">PNG</button>
+        <button class="btn" role="tab" data-fmt="svg" aria-pressed="false">SVG</button>
+        <button class="btn" role="tab" data-fmt="tex" aria-pressed="false">LaTeX</button>
+        <button class="btn" role="tab" data-fmt="jff" aria-pressed="false">JFLAP</button>
+      </div>
+      <button class="btn icon" id="export-close" aria-label="Close">✕</button>
+    </div>
+    <div class="dialog-body" id="export-body">
+      <div class="opt-row" id="png-opts">
+        <span class="label">Background</span>
+        <label class="radio"><input type="radio" name="png-bg" id="png-bg-white" value="white" checked> White</label>
+        <label class="radio"><input type="radio" name="png-bg" id="png-bg-none" value="none"> Transparent</label>
+        <span class="label">Size</span>
+        <label class="radio"><input type="radio" name="png-scale" id="png-scale-1" value="1"> 1×</label>
+        <label class="radio"><input type="radio" name="png-scale" id="png-scale-2" value="2" checked> 2×</label>
+        <label class="radio"><input type="radio" name="png-scale" id="png-scale-4" value="4"> 4× (print)</label>
+      </div>
+      <div class="opt-row" id="color-opt">
+        <label class="check"><input type="checkbox" id="export-colors"> Include state colors <span class="muted small-text">(off is best for printing and assignments)</span></label>
+      </div>
+      <div class="preview" id="export-preview"><img id="export-img" alt="Preview of the exported diagram"></div>
+      <textarea class="code" id="export-code" readonly spellcheck="false" hidden></textarea>
+      <div class="row">
+        <button class="btn primary" id="export-download">Download</button>
+        <button class="btn" id="export-copy" hidden>Copy code</button>
+        <span class="small-text muted" id="export-note"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button id="toast-action" hidden></button></div>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   DeltaDraw — DFA & NFA drawer
+   ===================================================================== */
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const TAU = Math.PI * 2;
+const PAGE = 'tm';
+// each tool page keeps its own drawing; the theme is shared by all pages
+const STORE_KEY = PAGE === 'regex' ? 'deltadraw:regex:v1' : PAGE === 'pda' ? 'deltadraw:pda:v1' : PAGE === 'tm' ? 'deltadraw:tm:v1' : 'deltadraw:v2';
+const THEME_KEY = 'deltadraw:theme';
+const VERSION = '1.8';
+const NODE_MIN_R = 26;
+const GRID = 20;
+let sim = null; // active string simulation (full version only)
+let walk = null; // active step-by-step walkthrough (full version only)
+
+/* ---------------- Storage (wrapped: may be unavailable) ---------------- */
+const store = {
+  get(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
+};
+function persist() {
+  if (typeof pr !== 'undefined' && pr.active) { pr.slots[pr.cur] = { nodes: doc.nodes, links: doc.links, nextId: doc.nextId }; prSave(); return; }
+  store.set(STORE_KEY, JSON.stringify({ doc: { nodes: doc.nodes, links: doc.links, nextId: doc.nextId }, settings }));
+}
+
+/* ---------------- Settings ---------------- */
+const settings = { theme: 'system', labelStyle: 'math', colorStates: true };
+
+/* ---------------- Document ---------------- */
+let doc = { nodes: [], links: [], nextId: 1 };
+const nodeMap = new Map();
+function reindex() { nodeMap.clear(); for (const n of doc.nodes) nodeMap.set(n.id, n); }
+const node = (id) => nodeMap.get(id);
+
+/* ---------------- Label text: symbols, sub/superscripts ---------------- */
+const SYMBOLS = {
+  alpha:'α',beta:'β',gamma:'γ',delta:'δ',epsilon:'ε',varepsilon:'ε',eps:'ε',zeta:'ζ',eta:'η',theta:'θ',iota:'ι',kappa:'κ',
+  lambda:'λ',mu:'μ',nu:'ν',xi:'ξ',pi:'π',rho:'ρ',sigma:'σ',tau:'τ',upsilon:'υ',phi:'φ',chi:'χ',psi:'ψ',omega:'ω',
+  Gamma:'Γ',Delta:'Δ',Theta:'Θ',Lambda:'Λ',Xi:'Ξ',Pi:'Π',Sigma:'Σ',Upsilon:'Υ',Phi:'Φ',Psi:'Ψ',Omega:'Ω',
+  emptyset:'∅',varnothing:'∅',to:'→',rightarrow:'→',cdot:'·',times:'×',cup:'∪',cap:'∩',square:'□',blank:'□',
+};
+const TEX_OF = { 'ε':'\\epsilon','∅':'\\emptyset','→':'\\to','·':'\\cdot','×':'\\times','∪':'\\cup','∩':'\\cap','□':'\\square' };
+for (const [k, v] of Object.entries(SYMBOLS)) if (!TEX_OF[v]) TEX_OF[v] = '\\' + k;
+
+function convertSymbols(t) {
+  return t.replace(/->/g, '→').replace(/\\([A-Za-z]+)/g, (m, name) => {
+    if (SYMBOLS[name]) return SYMBOLS[name];
+    // allow "\epsilon" glued to following text, e.g. \epsilona -> longest known prefix
+    for (let i = name.length - 1; i > 1; i--) if (SYMBOLS[name.slice(0, i)]) return SYMBOLS[name.slice(0, i)] + name.slice(i);
+    return m;
+  });
+}
+
+// runs: [{t, k}] k: 0 normal, 1 subscript, 2 superscript
+function parseLabel(text) {
+  const t = convertSymbols(text || '');
+  const runs = [];
+  let buf = '';
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if ((ch === '_' || ch === '^') && i + 1 < t.length) {
+      if (buf) { runs.push({ t: buf, k: 0 }); buf = ''; }
+      let part;
+      if (t[i + 1] === '{') {
+        const j = t.indexOf('}', i + 2);
+        if (j < 0) { part = t.slice(i + 2); i = t.length; } else { part = t.slice(i + 2, j); i = j; }
+      } else { part = t[i + 1]; i++; }
+      if (part) runs.push({ t: part, k: ch === '_' ? 1 : 2 });
+    } else buf += ch;
+  }
+  if (buf) runs.push({ t: buf, k: 0 });
+  return runs;
+}
+
+const SUB_DIGITS = { '0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉' };
+function plainLabel(text) {
+  return parseLabel(text).map((r) => {
+    if (r.k === 1) return /^[0-9]+$/.test(r.t) ? [...r.t].map((c) => SUB_DIGITS[c]).join('') : '_' + r.t;
+    if (r.k === 2) return '^' + r.t;
+    return r.t;
+  }).join('');
+}
+function escHTML(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function labelHTML(text) {
+  return parseLabel(text).map((r) => r.k === 1 ? `<sub>${escHTML(r.t)}</sub>` : r.k === 2 ? `<sup>${escHTML(r.t)}</sup>` : escHTML(r.t)).join('');
+}
+function texEscapeRun(s) {
+  let out = '';
+  for (const ch of s) {
+    if (TEX_OF[ch]) out += TEX_OF[ch] + ' ';
+    else if ('{}'.includes(ch)) out += '\\' + ch;
+    else if ('#$%&'.includes(ch)) out += '\\' + ch;
+    else if (ch === ' ') out += '\\ ';
+    else if (ch === '\\') out += '\\backslash ';
+    else if (ch === '~') out += '\\sim ';
+    else out += ch;
+  }
+  return out.replace(/ +$/, '');
+}
+function labelTeX(text) {
+  return parseLabel(text).map((r) => r.k === 1 ? `_{${texEscapeRun(r.t)}}` : r.k === 2 ? `^{${texEscapeRun(r.t)}}` : texEscapeRun(r.t)).join('');
+}
+
+/* ---------------- Fonts & measuring ---------------- */
+const FONT_SIZE = 20, SUB_SIZE = 14;
+function fontFor(k) {
+  const size = k ? SUB_SIZE : FONT_SIZE;
+  return settings.labelStyle === 'math'
+    ? `italic ${size}px "STIX Two Text", "Times New Roman", Times, serif`
+    : `${size}px "IBM Plex Sans", Arial, Helvetica, sans-serif`;
+}
+const measureCtx = document.createElement('canvas').getContext('2d');
+const measureCache = new Map();
+const LINE_H = 24;
+// "a,b→c; d,e→f" (PDA and Turing machine labels) is drawn as one rule per line
+const labelLines = (text) => (text.includes(';') ? text.split(';').map((x) => x.trim()).filter((x) => x.length) : [text]);
+function measureLabel(text) {
+  const key = settings.labelStyle + '\u0000' + text;
+  let m = measureCache.get(key);
+  if (m) return m;
+  const lines = labelLines(text).map((line) => {
+    let w = 0;
+    const parts = parseLabel(line).map((r) => {
+      measureCtx.font = fontFor(r.k);
+      const rw = measureCtx.measureText(r.t).width;
+      const p = { t: r.t, k: r.k, x: w, w: rw };
+      w += rw;
+      return p;
+    });
+    return { w, parts };
+  });
+  const w = Math.max(0, ...lines.map((l) => l.w)), k = lines.length;
+  const parts = [];
+  lines.forEach((l, i) => { for (const p of l.parts) parts.push({ ...p, x: p.x + (w - l.w) / 2, dy: (i - (k - 1) / 2) * LINE_H, line: i }); });
+  m = { w, h: 22 + (k - 1) * LINE_H, parts, lines: lines.length };
+  measureCache.set(key, m);
+  return m;
+}
+function R(n) {
+  const m = measureLabel(n.text || '');
+  return Math.max(NODE_MIN_R, m.w / 2 + (n.accept ? 14 : 10));
+}
+
+/* ---------------- Geometry ---------------- */
+function closestOnCircle(n, x, y) {
+  const dx = x - n.x, dy = y - n.y, s = Math.hypot(dx, dy) || 1, r = R(n);
+  return { x: n.x + dx * r / s, y: n.y + dy * r / s };
+}
+function det(a, b, c, d, e, f, g, h, i) { return a * e * i + b * f * g + c * d * h - a * f * h - b * d * i - c * e * g; }
+function circleFrom3(x1, y1, x2, y2, x3, y3) {
+  const a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
+  const bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
+  const by = det(x1 * x1 + y1 * y1, x1, 1, x2 * x2 + y2 * y2, x2, 1, x3 * x3 + y3 * y3, x3, 1);
+  const c = -det(x1 * x1 + y1 * y1, x1, y1, x2 * x2 + y2 * y2, x2, y2, x3 * x3 + y3 * y3, x3, y3);
+  return { x: -bx / (2 * a), y: -by / (2 * a), r: Math.sqrt(bx * bx + by * by - 4 * a * c) / (2 * Math.abs(a)) };
+}
+function anchorPoint(l, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, sc = Math.hypot(dx, dy) || 1;
+  return { x: a.x + dx * l.par - dy * l.perp / sc, y: a.y + dy * l.par + dx * l.perp / sc };
+}
+function setAnchor(l, a, b, x, y, snap) {
+  const dx = b.x - a.x, dy = b.y - a.y, sc = Math.hypot(dx, dy) || 1;
+  l.par = (dx * (x - a.x) + dy * (y - a.y)) / (sc * sc);
+  l.perp = (dx * (y - a.y) - dy * (x - a.x)) / sc;
+  if (Math.abs(l.perp) < snap) { l.par = 0.5; l.perp = 0; }
+}
+function labelBox(text, px, py, angle) {
+  const m = measureLabel(text);
+  const c = Math.cos(angle), s = Math.sin(angle);
+  const d = Math.abs(c) * m.w / 2 + Math.abs(s) * m.h / 2 + 5;
+  return { x: px + c * d, y: py + s * d, w: m.w, h: m.h };
+}
+
+// Computes everything needed to draw / hit-test a link.
+function linkGeom(l, tmpTarget) {
+  if (l.type === 'link') {
+    const a = node(l.from), b = tmpTarget || node(l.to);
+    if (!a || !b) return null;
+    const straight = () => {
+      const s = closestOnCircle(a, b.x, b.y), e = closestOnCircle(b, a.x, a.y);
+      const ang = Math.atan2(-(e.x - s.x), e.y - s.y);
+      const g = { kind: 'line', sx: s.x, sy: s.y, ex: e.x, ey: e.y, arrow: Math.atan2(e.y - s.y, e.x - s.x) };
+      g.label = l.text ? labelBox(l.text, (s.x + e.x) / 2, (s.y + e.y) / 2, ang) : null;
+      return g;
+    };
+    if (!l.perp) return straight();
+    const an = anchorPoint(l, a, b);
+    const c = circleFrom3(a.x, a.y, b.x, b.y, an.x, an.y);
+    if (!isFinite(c.r) || c.r > 1e5 || c.r < 1) return straight();
+    const rev = l.perp > 0, rs = rev ? 1 : -1;
+    const sa = Math.atan2(a.y - c.y, a.x - c.x) - rs * R(a) / c.r;
+    const ea = Math.atan2(b.y - c.y, b.x - c.x) + rs * R(b) / c.r;
+    const g = {
+      kind: 'arc', cx: c.x, cy: c.y, r: c.r, sa, ea, ccw: rev,
+      sx: c.x + c.r * Math.cos(sa), sy: c.y + c.r * Math.sin(sa),
+      ex: c.x + c.r * Math.cos(ea), ey: c.y + c.r * Math.sin(ea),
+      arrow: ea - rs * Math.PI / 2,
+    };
+    let s2 = sa, e2 = ea;
+    if (e2 < s2) e2 += TAU;
+    const ta = (s2 + e2) / 2 + (rev ? Math.PI : 0);
+    g.label = l.text ? labelBox(l.text, c.x + c.r * Math.cos(ta), c.y + c.r * Math.sin(ta), ta) : null;
+    return g;
+  }
+  if (l.type === 'self') {
+    const n = node(l.node);
+    if (!n) return null;
+    const r = R(n), lr = 0.75 * Math.min(r, 30);
+    const d = 0.809 * lr + Math.sqrt(Math.max(0, r * r - Math.pow(0.588 * lr, 2)));
+    const cx = n.x + d * Math.cos(l.angle), cy = n.y + d * Math.sin(l.angle);
+    const sa = l.angle - Math.PI * 0.8, ea = l.angle + Math.PI * 0.8;
+    const g = {
+      kind: 'arc', cx, cy, r: lr, sa, ea, ccw: false, self: true,
+      ex: cx + lr * Math.cos(ea), ey: cy + lr * Math.sin(ea), arrow: ea + Math.PI * 0.4,
+    };
+    g.label = l.text ? labelBox(l.text, cx + lr * Math.cos(l.angle), cy + lr * Math.sin(l.angle), l.angle) : null;
+    return g;
+  }
+  if (l.type === 'start') {
+    const n = node(l.node);
+    if (!n) return null;
+    const sx = n.x + l.dx, sy = n.y + l.dy;
+    const e = closestOnCircle(n, sx, sy);
+    const g = { kind: 'line', sx, sy, ex: e.x, ey: e.y, arrow: Math.atan2(e.y - sy, e.x - sx) };
+    g.label = l.text ? labelBox(l.text, sx, sy, Math.atan2(sy - e.y, sx - e.x)) : null;
+    return g;
+  }
+  return null;
+}
+
+/* ---------------- Pens: canvas, SVG, TikZ, bounding box ---------------- */
+function arcSpan(a0, a1, ccw) {
+  let span = ccw ? a0 - a1 : a1 - a0;
+  span = ((span % TAU) + TAU) % TAU;
+  return span;
+}
+function arrowPts(x, y, ang, size = 10) {
+  const dx = Math.cos(ang), dy = Math.sin(ang), w = size * 0.55;
+  return [[x, y], [x - size * dx + w * dy, y - size * dy - w * dx], [x - size * dx - w * dy, y - size * dy + w * dx]];
+}
+
+class CanvasPen {
+  constructor(c) { this.c = c; }
+  circle(x, y, r, o) {
+    const c = this.c; c.beginPath(); c.arc(x, y, r, 0, TAU);
+    if (o.fill && o.fill !== 'none') { c.fillStyle = o.fill; c.fill(); }
+    if (o.stroke) { c.lineWidth = o.lw; c.strokeStyle = o.stroke; c.stroke(); }
+  }
+  line(x1, y1, x2, y2, o) {
+    const c = this.c; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
+    c.lineWidth = o.lw; c.strokeStyle = o.stroke; if (o.dash) c.setLineDash(o.dash); c.stroke(); c.setLineDash([]);
+  }
+  arc(cx, cy, r, a0, a1, ccw, o) {
+    const c = this.c; c.beginPath(); c.arc(cx, cy, r, a0, a1, ccw);
+    c.lineWidth = o.lw; c.strokeStyle = o.stroke; if (o.dash) c.setLineDash(o.dash); c.stroke(); c.setLineDash([]);
+  }
+  arrow(x, y, ang, o) {
+    const c = this.c, p = arrowPts(x, y, ang);
+    c.beginPath(); c.moveTo(p[0][0], p[0][1]); c.lineTo(p[1][0], p[1][1]); c.lineTo(p[2][0], p[2][1]); c.closePath();
+    c.fillStyle = o.fill; c.fill();
+  }
+  text(text, x, y, o) {
+    const c = this.c, m = measureLabel(text), x0 = x - m.w / 2, base = y + 6.5;
+    c.fillStyle = o.color; c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+    for (const p of m.parts) {
+      c.font = fontFor(p.k);
+      c.fillStyle = o.hlLine != null && p.line === o.hlLine ? o.hlColor : o.color;
+      c.fillText(p.t, x0 + p.x, (p.k === 1 ? base + 5 : p.k === 2 ? base - 8 : base) + p.dy);
+    }
+  }
+}
+
+const f2 = (v) => (Math.round(v * 100) / 100).toString();
+function escXML(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+class SvgPen {
+  constructor() { this.out = []; }
+  circle(x, y, r, o) {
+    this.out.push(`<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" fill="${o.fill && o.fill !== 'none' ? o.fill : 'none'}" stroke="${o.stroke}" stroke-width="${o.lw}"/>`);
+  }
+  line(x1, y1, x2, y2, o) {
+    this.out.push(`<path d="M${f2(x1)} ${f2(y1)}L${f2(x2)} ${f2(y2)}" fill="none" stroke="${o.stroke}" stroke-width="${o.lw}"/>`);
+  }
+  arc(cx, cy, r, a0, a1, ccw, o) {
+    const span = arcSpan(a0, a1, ccw);
+    const x1 = cx + r * Math.cos(a0), y1 = cy + r * Math.sin(a0), x2 = cx + r * Math.cos(a1), y2 = cy + r * Math.sin(a1);
+    this.out.push(`<path d="M${f2(x1)} ${f2(y1)}A${f2(r)} ${f2(r)} 0 ${span > Math.PI ? 1 : 0} ${ccw ? 0 : 1} ${f2(x2)} ${f2(y2)}" fill="none" stroke="${o.stroke}" stroke-width="${o.lw}"/>`);
+  }
+  arrow(x, y, ang, o) {
+    const p = arrowPts(x, y, ang);
+    this.out.push(`<path d="M${f2(p[0][0])} ${f2(p[0][1])}L${f2(p[1][0])} ${f2(p[1][1])}L${f2(p[2][0])} ${f2(p[2][1])}Z" fill="${o.fill}"/>`);
+  }
+  text(text, x, y, o) {
+    const m = measureLabel(text), x0 = x - m.w / 2, base = y + 6.5;
+    const fam = settings.labelStyle === 'math' ? `'STIX Two Text','Times New Roman',Times,serif` : `'IBM Plex Sans',Arial,Helvetica,sans-serif`;
+    const style = settings.labelStyle === 'math' ? ' font-style="italic"' : '';
+    for (const p of m.parts) {
+      const yy = (p.k === 1 ? base + 5 : p.k === 2 ? base - 8 : base) + p.dy;
+      this.out.push(`<text x="${f2(x0 + p.x)}" y="${f2(yy)}" font-family="${fam}"${style} font-size="${p.k ? SUB_SIZE : FONT_SIZE}" fill="${o.color}">${escXML(p.t)}</text>`);
+    }
+  }
+}
+
+const TIKZ_SCALE = 50; // 50 px = 1 cm
+class TikzPen {
+  constructor() { this.out = []; }
+  P(x, y) { return `(${f2(x / TIKZ_SCALE)},${f2(-y / TIKZ_SCALE)})`; }
+  circle(x, y, r, o) {
+    const cmd = o && o.fillTex ? `\\filldraw[fill=${o.fillTex}]` : '\\draw';
+    this.out.push(`${cmd} ${this.P(x, y)} circle (${f2(r / TIKZ_SCALE)});`);
+  }
+  line(x1, y1, x2, y2) { this.out.push(`\\draw ${this.P(x1, y1)} -- ${this.P(x2, y2)};`); }
+  arc(cx, cy, r, a0, a1, ccw) {
+    const span = arcSpan(a0, a1, ccw) * 180 / Math.PI;
+    const s = -a0 * 180 / Math.PI, e = ccw ? s + span : s - span;
+    this.out.push(`\\draw ${this.P(cx + r * Math.cos(a0), cy + r * Math.sin(a0))} arc (${f2(s)}:${f2(e)}:${f2(r / TIKZ_SCALE)});`);
+  }
+  arrow(x, y, ang) {
+    const p = arrowPts(x, y, ang);
+    this.out.push(`\\fill ${this.P(p[0][0], p[0][1])} -- ${this.P(p[1][0], p[1][1])} -- ${this.P(p[2][0], p[2][1])} -- cycle;`);
+  }
+  text(text, x, y) {
+    if (!text) return;
+    const lines = labelLines(text);
+    if (lines.length > 1) this.out.push(`\\draw ${this.P(x, y)} node[align=center] {${lines.map((l) => `$${labelTeX(l)}$`).join('\\\\ ')}};`);
+    else this.out.push(`\\draw ${this.P(x, y)} node {$${labelTeX(text)}$};`);
+  }
+}
+
+class BBoxPen {
+  constructor() { this.x0 = Infinity; this.y0 = Infinity; this.x1 = -Infinity; this.y1 = -Infinity; }
+  add(x, y) { this.x0 = Math.min(this.x0, x); this.y0 = Math.min(this.y0, y); this.x1 = Math.max(this.x1, x); this.y1 = Math.max(this.y1, y); }
+  circle(x, y, r, o) { const p = (o && o.lw) || 0; this.add(x - r - p, y - r - p); this.add(x + r + p, y + r + p); }
+  line(x1, y1, x2, y2) { this.add(x1, y1); this.add(x2, y2); }
+  arc(cx, cy, r, a0, a1, ccw) {
+    const span = arcSpan(a0, a1, ccw), dir = ccw ? -1 : 1;
+    for (let i = 0; i <= 36; i++) { const a = a0 + dir * span * i / 36; this.add(cx + r * Math.cos(a), cy + r * Math.sin(a)); }
+  }
+  arrow(x, y, ang) { for (const p of arrowPts(x, y, ang)) this.add(p[0], p[1]); }
+  text(text, x, y) { const m = measureLabel(text); this.add(x - m.w / 2, y - m.h / 2 - 4); this.add(x + m.w / 2, y + m.h / 2 + 4); }
+  get box() { return isFinite(this.x0) ? { x: this.x0, y: this.y0, w: this.x1 - this.x0, h: this.y1 - this.y0 } : null; }
+}
+
+/* ---------------- Drawing the diagram with any pen ---------------- */
+function drawLink(pen, l, g, st) {
+  if (!g) return;
+  const o = { stroke: st.stroke, lw: st.lw, dash: st.dash };
+  if (g.kind === 'line') pen.line(g.sx, g.sy, g.ex, g.ey, o);
+  else pen.arc(g.cx, g.cy, g.r, g.sa, g.ea, g.ccw, o);
+  pen.arrow(g.ex, g.ey, g.arrow, { fill: st.stroke });
+  if (g.label) pen.text(l.text, g.label.x, g.label.y, { color: st.text, hlLine: st.hlLine, hlColor: st.hlColor });
+}
+function drawNode(pen, n, st) {
+  const r = R(n);
+  pen.circle(n.x, n.y, r, { fill: st.fill, stroke: st.stroke, lw: st.lw, fillTex: st.fillTex });
+  if (n.accept) pen.circle(n.x, n.y, r - 5, { stroke: st.stroke, lw: st.lw });
+  if (n.text) pen.text(n.text, n.x, n.y, { color: st.text });
+}
+// opts: { P: palette, sel, hlNodes:Set, hlLinks:Set, nodeFill, colors, dim(id) → faint (not built yet) }
+function drawDiagram(pen, opts) {
+  const P = opts.P;
+  const base = { stroke: P.ink, text: P.ink, lw: 1.6 };
+  const faint = { stroke: P.grid || P.ink, text: P.grid || P.ink, lw: 1.2 };
+  const startIds = new Set(doc.links.filter((l) => l.type === 'start').map((l) => l.node));
+  for (const l of doc.links) {
+    let st = base;
+    if (opts.dim && opts.dim(l.id)) st = faint;
+    if (opts.hlLinks && opts.hlLinks.has(l.id)) {
+      st = { stroke: P.hl, text: P.hl, lw: 2.6 };
+      // a PDA arrow with several rules: only the rule being used is highlighted
+      const line = opts.hlRule && opts.hlRule.get(l.id);
+      if (line != null && labelLines(l.text || '').length > 1) st = { ...st, text: P.ink, hlLine: line, hlColor: P.hl };
+    }
+    if (opts.sel && opts.sel.kind === 'link' && opts.sel.id === l.id) st = { stroke: P.accent, text: P.accent, lw: 2.4 };
+    drawLink(pen, l, linkGeom(l), st);
+  }
+  for (const n of doc.nodes) {
+    let st = { ...base, fill: opts.nodeFill };
+    if (opts.colors) {
+      if (n.accept) st = { ...st, fill: P.acceptFill, fillTex: 'green!15' };
+      else if (startIds.has(n.id)) st = { ...st, fill: P.startFill, fillTex: 'blue!12' };
+    }
+    if (opts.dim && opts.dim(n.id)) st = { ...faint, fill: opts.nodeFill };
+    if (opts.hlNodes && opts.hlNodes.has(n.id)) st = { stroke: P.hl, text: P.ink, lw: 2.6, fill: P.hlSoft };
+    if (opts.sel && opts.sel.kind === 'node' && opts.sel.id === n.id) st = { ...st, stroke: P.accent, lw: 2.4 };
+    drawNode(pen, n, st);
+  }
+}
+// Draw or measure another drawing (a walkthrough step) without touching the user's own
+function withDoc(d, fn) {
+  const saved = doc;
+  doc = d; reindex();
+  try { return fn(); } finally { doc = saved; reindex(); }
+}
+
+/* ---------------- Canvas, view & rendering ---------------- */
+const stage = $('#stage');
+const canvas = $('#canvas');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, dpr = 1;
+const view = { s: 1, tx: 0, ty: 0 };
+let PAL = {};
+function readPalette() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = (n) => cs.getPropertyValue(n).trim();
+  PAL = { ink: g('--ink'), stage: g('--stage'), node: g('--surface'), accent: g('--accent'), hl: g('--hl'), hlSoft: g('--hl-soft'), grid: g('--grid'), muted: g('--muted'), startFill: g('--start-fill'), acceptFill: g('--accept-fill') };
+}
+function resize() {
+  const r = stage.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  canvas.width = Math.max(1, Math.round(W * dpr));
+  canvas.height = Math.max(1, Math.round(H * dpr));
+  render();
+}
+const toWorld = (cx, cy) => ({ x: (cx - view.tx) / view.s, y: (cy - view.ty) / view.s });
+function eventPoint(e) { const r = canvas.getBoundingClientRect(); return toWorld(e.clientX - r.left, e.clientY - r.top); }
+
+let rafId = 0;
+function render() { if (!rafId) rafId = requestAnimationFrame(() => { rafId = 0; paint(); }); }
+function paint() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, W, H);
+  // dot grid
+  const step = GRID * view.s;
+  if (step >= 9) {
+    ctx.fillStyle = PAL.grid;
+    const ox = ((view.tx % step) + step) % step, oy = ((view.ty % step) + step) % step;
+    const rad = Math.max(0.8, Math.min(1.3, view.s));
+    for (let x = ox; x < W; x += step) for (let y = oy; y < H; y += step) { ctx.fillRect(x - rad / 2, y - rad / 2, rad, rad); }
+  }
+  ctx.setTransform(dpr * view.s, 0, 0, dpr * view.s, dpr * view.tx, dpr * view.ty);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const pen = new CanvasPen(ctx);
+  // highlights come from a running walkthrough (full version) or the string simulation
+  const step2 = (walk && walk.steps[walk.idx]) || (sim && sim.steps[sim.idx]);
+  const drawAll = () => drawDiagram(pen, {
+    P: PAL, sel: selection, nodeFill: PAL.node, colors: settings.colorStates,
+    hlNodes: step2 && step2.set, hlLinks: step2 && step2.used, hlRule: step2 && step2.rule,
+    dim: step2 && step2.dimFrom ? (id) => id >= step2.dimFrom : null,
+  });
+  if (step2 && step2.doc) withDoc(step2.doc, drawAll); else drawAll();
+  // link being created
+  if (drag && (drag.mode === 'newlink' || drag.mode === 'newstart')) {
+    const st = { stroke: PAL.accent, text: PAL.accent, lw: 2, dash: [6, 5] };
+    const tl = tempLink();
+    if (tl) drawLink(pen, tl.l, tl.g, st);
+  }
+  $('#zoom-level').textContent = Math.round(view.s * 100) + '%';
+}
+
+function diagramBBox(forExport) {
+  const bb = new BBoxPen();
+  drawDiagram(bb, { P: { ink: '#000', accent: '#000', hl: '#000', hlSoft: '#000' }, nodeFill: 'none' });
+  return bb.box;
+}
+function fitView() {
+  const bb = diagramBBox();
+  if (!bb) { view.s = 1; view.tx = W / 2; view.ty = H / 2; render(); return; }
+  const pad = 48;
+  // keep clear of the bottom bar, or of the walkthrough card when one is open
+  const card = document.getElementById('walk');
+  const reserve = card && !card.hidden ? Math.min(H * 0.62, card.offsetHeight + 64) : 30;
+  const availH = Math.max(120, H - reserve);
+  const s = Math.min(1.3, Math.max(0.2, Math.min((W - 2 * pad) / Math.max(bb.w, 1), (availH - 2 * pad + 20) / Math.max(bb.h, 1))));
+  view.s = s;
+  view.tx = W / 2 - (bb.x + bb.w / 2) * s;
+  view.ty = availH / 2 - (bb.y + bb.h / 2) * s;
+  render();
+}
+function zoomAt(factor, cx, cy) {
+  const s = Math.min(4, Math.max(0.2, view.s * factor));
+  const k = s / view.s;
+  view.tx = cx - (cx - view.tx) * k;
+  view.ty = cy - (cy - view.ty) * k;
+  view.s = s;
+  render();
+}
+
+/* ---------------- Hit testing ---------------- */
+function nodeAt(p) {
+  for (let i = doc.nodes.length - 1; i >= 0; i--) {
+    const n = doc.nodes[i];
+    if (Math.hypot(p.x - n.x, p.y - n.y) < R(n)) return n;
+  }
+  return null;
+}
+function linkContains(g, p, pad) {
+  if (!g) return false;
+  if (g.label && Math.abs(p.x - g.label.x) <= g.label.w / 2 + 3 && Math.abs(p.y - g.label.y) <= g.label.h / 2 + 2) return true;
+  if (g.kind === 'line') {
+    const dx = g.ex - g.sx, dy = g.ey - g.sy, len = Math.hypot(dx, dy) || 1;
+    const t = ((p.x - g.sx) * dx + (p.y - g.sy) * dy) / (len * len);
+    if (t < -0.02 || t > 1.02) return false;
+    const d = Math.abs((p.x - g.sx) * dy - (p.y - g.sy) * dx) / len;
+    return d < pad;
+  }
+  const dx = p.x - g.cx, dy = p.y - g.cy;
+  if (Math.abs(Math.hypot(dx, dy) - g.r) >= pad) return false;
+  if (g.self) return true;
+  let a = Math.atan2(dy, dx), sa = g.sa, ea = g.ea;
+  if (g.ccw) { const t = sa; sa = ea; ea = t; }
+  if (ea < sa) ea += TAU;
+  if (a < sa) a += TAU; else if (a > ea) a -= TAU;
+  return a > sa && a < ea;
+}
+function linkAt(p) {
+  const pad = Math.max(5, 7 / view.s);
+  for (let i = doc.links.length - 1; i >= 0; i--) {
+    const l = doc.links[i];
+    if (linkContains(linkGeom(l), p, pad)) return l;
+  }
+  return null;
+}
+
+/* ---------------- Selection ---------------- */
+let selection = null; // {kind:'node'|'link', id}
+let replaceOnType = false;
+function selectedObj() {
+  if (!selection) return null;
+  if (selection.kind === 'node') return node(selection.id) || null;
+  return doc.links.find((l) => l.id === selection.id) || null;
+}
+function select(kind, id) {
+  selection = kind ? { kind, id } : null;
+  replaceOnType = kind === 'node';
+  updateSelectionPanel();
+  render();
+}
+
+/* ---------------- History (undo / redo) ---------------- */
+const history = { stack: [], idx: -1 };
+function snapshot() { return JSON.stringify({ nodes: doc.nodes, links: doc.links, nextId: doc.nextId }); }
+let commitTimer = 0;
+function commit() {
+  clearTimeout(commitTimer); commitTimer = 0;
+  const s = snapshot();
+  if (history.stack[history.idx] === s) return;
+  history.stack = history.stack.slice(0, history.idx + 1);
+  history.stack.push(s);
+  if (history.stack.length > 300) history.stack.shift();
+  history.idx = history.stack.length - 1;
+  docChanged();
+}
+function scheduleCommit() { clearTimeout(commitTimer); commitTimer = setTimeout(commit, 450); }
+function restore(s) {
+  const d = JSON.parse(s);
+  doc = { nodes: d.nodes, links: d.links, nextId: d.nextId };
+  reindex();
+  if (selection && !selectedObj()) selection = null;
+  docChanged();
+  updateSelectionPanel();
+}
+function undo() { if (commitTimer) commit(); if (history.idx > 0) { history.idx--; restore(history.stack[history.idx]); } }
+function redo() { if (history.idx < history.stack.length - 1) { history.idx++; restore(history.stack[history.idx]); } }
+function docChanged() {
+  measureCache.size > 2000 && measureCache.clear();
+  persist();
+  resetSim(true);
+  checkWalkStillValid();
+  updateMachineInfo();
+  updateTable();
+  $('#welcome').hidden = doc.nodes.length > 0;
+  $('#btn-undo').disabled = history.idx <= 0;
+  $('#btn-redo').disabled = history.idx >= history.stack.length - 1;
+  render();
+}
+function loadDoc(d, keepView) {
+  doc = { nodes: d.nodes.map((n) => ({ ...n })), links: d.links.map((l) => ({ ...l })), nextId: d.nextId || 1 };
+  let maxId = 0;
+  for (const n of doc.nodes) maxId = Math.max(maxId, n.id);
+  for (const l of doc.links) maxId = Math.max(maxId, l.id || 0);
+  for (const l of doc.links) if (!l.id) l.id = ++maxId;
+  doc.nextId = Math.max(doc.nextId, maxId + 1);
+  reindex();
+  selection = null;
+  updateSelectionPanel();
+  commit();
+  if (!keepView) fitView();
+}
+
+/* ---------------- Editing operations ---------------- */
+const newId = () => doc.nextId++;
+function nextStateName() {
+  const used = new Set(doc.nodes.map((n) => plainLabel(n.text)));
+  for (let i = 0; ; i++) if (!used.has('q' + [...String(i)].map((c) => SUB_DIGITS[c]).join(''))) return i > 9 ? `q_{${i}}` : `q_${i}`;
+}
+function addNode(x, y) {
+  const n = { id: newId(), x, y, text: nextStateName(), accept: false };
+  doc.nodes.push(n); nodeMap.set(n.id, n);
+  if (!doc.links.some((l) => l.type === 'start')) doc.links.push({ id: newId(), type: 'start', node: n.id, dx: -(R(n) + 42), dy: 0, text: '' });
+  return n;
+}
+function deleteSelected() {
+  const o = selectedObj();
+  if (!o) return;
+  if (selection.kind === 'node') {
+    doc.nodes = doc.nodes.filter((n) => n !== o);
+    doc.links = doc.links.filter((l) => l.from !== o.id && l.to !== o.id && l.node !== o.id);
+    reindex();
+  } else doc.links = doc.links.filter((l) => l !== o);
+  select(null);
+  commit();
+}
+function setInitial(n, on) {
+  doc.links = doc.links.filter((l) => !(l.type === 'start' && (on || l.node === n.id)));
+  if (on) doc.links.push({ id: newId(), type: 'start', node: n.id, dx: -(R(n) + 42), dy: 0, text: '' });
+}
+function setLabel(o, text) {
+  o.text = text;
+  render();
+  scheduleCommit();
+}
+
+/* ---------------- Pointer interaction ---------------- */
+let tool = 'select';
+let drag = null;
+function setTool(t) {
+  tool = t;
+  for (const b of $$('[data-tool]')) b.setAttribute('aria-pressed', String(b.dataset.tool === t));
+  updateHint();
+  canvas.style.cursor = t === 'state' ? 'crosshair' : 'default';
+}
+function updateHint() {
+  const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const hints = touch ? {
+    select: 'Tap a state or arrow to edit it · Drag to move · Use State and Transition to draw',
+    state: 'Tap anywhere to add a state',
+    link: 'Drag from one state to another · Drag from empty space onto a state for the start arrow',
+  } : {
+    select: 'Double-click empty space to add a state · Double-click a state to make it accepting · Shift-drag between states for a transition · Drag empty space to pan',
+    state: 'Click anywhere to add a state · Press Esc when you are done',
+    link: 'Drag from one state to another (or back onto itself for a loop) · Drag from empty space onto a state for the start arrow',
+  };
+  $('#hint').textContent = hints[tool];
+}
+function tempLink() {
+  if (!drag) return null;
+  const p = drag.p;
+  if (drag.mode === 'newlink') {
+    const a = node(drag.from);
+    const over = nodeAt(p);
+    if (over === a) {
+      const ang = Math.hypot(p.x - a.x, p.y - a.y) > 4 ? Math.atan2(p.y - a.y, p.x - a.x) : -Math.PI / 2;
+      const l = { type: 'self', node: a.id, angle: ang, text: '' };
+      return { l, g: linkGeom(l) };
+    }
+    const l = { type: 'link', from: a.id, to: over ? over.id : -1, par: 0.5, perp: 0, text: '' };
+    if (over) return { l, g: linkGeom(l) };
+    const s = closestOnCircle(a, p.x, p.y);
+    return { l, g: { kind: 'line', sx: s.x, sy: s.y, ex: p.x, ey: p.y, arrow: Math.atan2(p.y - s.y, p.x - s.x) } };
+  }
+  if (drag.mode === 'newstart') {
+    const over = nodeAt(p);
+    if (over) {
+      const l = { type: 'start', node: over.id, dx: drag.start.x - over.x, dy: drag.start.y - over.y, text: '' };
+      return { l, g: linkGeom(l) };
+    }
+    return { l: { type: 'start' }, g: { kind: 'line', sx: drag.start.x, sy: drag.start.y, ex: p.x, ey: p.y, arrow: Math.atan2(p.y - drag.start.y, p.x - drag.start.x) } };
+  }
+  return null;
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0 && e.pointerType === 'mouse') {
+    if (e.button === 1) { e.preventDefault(); drag = { mode: 'pan', cx: e.clientX, cy: e.clientY, tx: view.tx, ty: view.ty }; canvas.setPointerCapture(e.pointerId); }
+    return;
+  }
+  if (document.activeElement && document.activeElement !== canvas && document.activeElement.blur) document.activeElement.blur();
+  canvas.focus({ preventScroll: true });
+  if (walk && walk.locked) {
+    // the canvas is showing a walkthrough step, not the user's drawing: allow panning only
+    drag = { mode: 'pan', cx: e.clientX, cy: e.clientY, tx: view.tx, ty: view.ty };
+    canvas.setPointerCapture(e.pointerId);
+    return;
+  }
+  canvas.setPointerCapture(e.pointerId);
+  if (commitTimer) commit();
+  const p = eventPoint(e);
+  const hitN = nodeAt(p);
+  const hitL = hitN ? null : linkAt(p);
+  const linkTool = tool === 'link' || e.shiftKey;
+  drag = null;
+
+  if (linkTool && hitN) { drag = { mode: 'newlink', from: hitN.id, p }; select('node', hitN.id); }
+  else if (linkTool && !hitL) { drag = { mode: 'newstart', start: p, p }; select(null); }
+  else if (tool === 'state' && !hitN && !hitL) {
+    const n = addNode(snapPoint(p.x, p.y, null).x, snapPoint(p.x, p.y, null).y);
+    select('node', n.id); commit();
+  } else if (hitN) {
+    select('node', hitN.id);
+    drag = { mode: 'node', id: hitN.id, ox: p.x - hitN.x, oy: p.y - hitN.y, moved: false };
+  } else if (hitL) {
+    select('link', hitL.id);
+    drag = { mode: hitL.type === 'link' ? 'bend' : hitL.type, id: hitL.id, moved: false };
+  } else {
+    select(null);
+    drag = { mode: 'pan', cx: e.clientX, cy: e.clientY, tx: view.tx, ty: view.ty };
+    canvas.style.cursor = 'grabbing';
+  }
+  render();
+});
+
+function snapPoint(x, y, selfId) {
+  const th = 7 / view.s;
+  for (const n of doc.nodes) {
+    if (n.id === selfId) continue;
+    if (Math.abs(x - n.x) < th) x = n.x;
+    if (Math.abs(y - n.y) < th) y = n.y;
+  }
+  return { x, y };
+}
+
+canvas.addEventListener('pointermove', (e) => {
+  const p = eventPoint(e);
+  if (!drag) {
+    if (tool === 'state') return;
+    const over = nodeAt(p) || linkAt(p);
+    canvas.style.cursor = over ? (e.shiftKey || tool === 'link' ? 'crosshair' : 'move') : (tool === 'link' || e.shiftKey ? 'crosshair' : 'default');
+    return;
+  }
+  if (drag.mode === 'pan') {
+    view.tx = drag.tx + (e.clientX - drag.cx);
+    view.ty = drag.ty + (e.clientY - drag.cy);
+    render();
+    return;
+  }
+  drag.p = p;
+  if (drag.mode === 'node') {
+    const n = node(drag.id);
+    const s = snapPoint(p.x - drag.ox, p.y - drag.oy, n.id);
+    if (s.x !== n.x || s.y !== n.y) drag.moved = true;
+    n.x = s.x; n.y = s.y;
+  } else if (drag.mode === 'bend') {
+    const l = doc.links.find((x) => x.id === drag.id);
+    setAnchor(l, node(l.from), node(l.to), p.x, p.y, 6 / view.s);
+    drag.moved = true;
+  } else if (drag.mode === 'self') {
+    const l = doc.links.find((x) => x.id === drag.id), n = node(l.node);
+    let a = Math.atan2(p.y - n.y, p.x - n.x);
+    const sn = Math.round(a / (Math.PI / 2)) * (Math.PI / 2);
+    if (Math.abs(a - sn) < 0.12) a = sn;
+    l.angle = a; drag.moved = true;
+  } else if (drag.mode === 'start') {
+    const l = doc.links.find((x) => x.id === drag.id), n = node(l.node);
+    l.dx = p.x - n.x; l.dy = p.y - n.y;
+    if (Math.abs(l.dx) < 7 / view.s) l.dx = 0;
+    if (Math.abs(l.dy) < 7 / view.s) l.dy = 0;
+    drag.moved = true;
+  }
+  render();
+});
+
+function endDrag(e) {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  if (d.mode === 'pan') { canvas.style.cursor = tool === 'state' ? 'crosshair' : 'default'; render(); return; }
+  if (d.mode === 'newlink' || d.mode === 'newstart') {
+    drag = d; const tl = tempLink(); drag = null;
+    if (tl && tl.l.type === 'self') {
+      const dup = doc.links.find((l) => l.type === 'self' && l.node === tl.l.node);
+      if (dup) { select('link', dup.id); toast('This state already has a loop. Add more symbols to its label, separated by commas.'); }
+      else { const l = { id: newId(), ...tl.l }; doc.links.push(l); select('link', l.id); commit(); focusLabel(); }
+    } else if (tl && tl.l.type === 'link' && tl.l.to !== -1) {
+      const dup = doc.links.find((l) => l.type === 'link' && l.from === tl.l.from && l.to === tl.l.to);
+      if (dup) { select('link', dup.id); toast('This transition already exists. Add more symbols to its label, separated by commas.'); }
+      else {
+        const l = { id: newId(), ...tl.l };
+        // curve both arrows when a reverse transition exists
+        const rev = doc.links.find((x) => x.type === 'link' && x.from === l.to && x.to === l.from);
+        if (rev) { l.perp = 28; l.par = 0.5; if (!rev.perp) { rev.perp = 28; rev.par = 0.5; } }
+        doc.links.push(l); select('link', l.id); commit(); focusLabel();
+      }
+    } else if (tl && tl.l.type === 'start' && tl.l.node != null) {
+      doc.links = doc.links.filter((l) => l.type !== 'start');
+      const l = { id: newId(), ...tl.l };
+      doc.links.push(l); select('link', l.id); commit();
+    }
+    render();
+    return;
+  }
+  if (d.moved) commit();
+  render();
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', () => { drag = null; render(); });
+
+canvas.addEventListener('dblclick', (e) => {
+  if (tool === 'state' || (walk && walk.locked)) return;
+  const p = eventPoint(e);
+  const n = nodeAt(p);
+  if (n) { n.accept = !n.accept; select('node', n.id); commit(); return; }
+  if (linkAt(p)) { focusLabel(true); return; }
+  const s = snapPoint(p.x, p.y, null);
+  const nn = addNode(s.x, s.y);
+  select('node', nn.id); commit();
+});
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const k = e.ctrlKey ? 0.01 : 0.0015;
+  const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+  zoomAt(Math.exp(-dy * k), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+
+/* ---------------- Keyboard ---------------- */
+function isTyping(el) { return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable); }
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  const openModal = document.querySelector('.modal:not([hidden])');
+  if (openModal) { if (e.key === 'Escape' && openModal.id === 'export-modal') closeExport(); return; }
+  if (mod && (e.key === 's' || e.key === 'S')) { e.preventDefault(); saveShortcut(); return; }
+  if (isTyping(e.target)) {
+    // In the label box, Ctrl+Z / Ctrl+Y act on the drawing (label edits are part of the drawing's history)
+    if (e.target.id === 'sel-label' && mod && /^[zZyY]$/.test(e.key)) {
+      e.preventDefault();
+      (e.key === 'y' || e.key === 'Y' || e.shiftKey) ? redo() : undo();
+      if (!selectedObj()) { e.target.blur(); canvas.focus({ preventScroll: true }); }
+      return;
+    }
+    if (e.key === 'Escape' || (e.key === 'Enter' && e.target.id === 'sel-label')) { e.target.blur(); canvas.focus({ preventScroll: true }); }
+    return;
+  }
+  if (mod && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if (mod && (e.key === 'y' || e.key === 'Y')) { e.preventDefault(); redo(); return; }
+  if (mod) return;
+  // only handle canvas-level keys when focus is on the page/canvas, not on buttons in the about section
+  const o = selectedObj();
+  if (e.key === 'Escape') { select(null); setTool('select'); return; }
+  if (e.key === 'Delete') { if (o) { e.preventDefault(); deleteSelected(); } return; }
+  if (!o || !('text' in o) || o.type === 'start') {
+    if (e.key === 'Backspace' && o) { e.preventDefault(); deleteSelected(); }
+    return;
+  }
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    if (!o.text) { deleteSelected(); return; }
+    replaceOnType = false;
+    setLabel(o, o.text.slice(0, -1));
+    syncLabelInput();
+    return;
+  }
+  if (e.key.length === 1 && !e.altKey) {
+    e.preventDefault();
+    setLabel(o, (replaceOnType ? '' : o.text) + e.key);
+    replaceOnType = false;
+    syncLabelInput();
+  }
+});
+
+/* ---------------- Selection panel ---------------- */
+const selLabel = $('#sel-label');
+// On touch screens, jump into the label box so the keyboard opens. With a mouse, typing
+// on the canvas already edits the label, so focus stays on the canvas (unless forced).
+function focusLabel(force) {
+  const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if (touch || force) { selLabel.focus(); selLabel.select(); }
+}
+function syncLabelInput() {
+  const o = selectedObj();
+  if (o && document.activeElement !== selLabel) selLabel.value = o.text || '';
+}
+function updateSelectionPanel() {
+  const o = selectedObj();
+  $('#sel-empty').hidden = !!o;
+  $('#sel-edit').hidden = !o;
+  $('#btn-delete').disabled = !o;
+  if (!o) { $('#sel-title').textContent = 'Selection'; return; }
+  const isNode = selection.kind === 'node';
+  const isStart = o.type === 'start';
+  $('#sel-title').textContent = isNode ? 'State' : isStart ? 'Start arrow' : o.type === 'self' ? 'Self-loop' : 'Transition';
+  $('#sel-node-opts').hidden = !isNode;
+  $('#sel-straighten').hidden = !(o.type === 'link' && o.perp);
+  $('#sel-label-wrap').hidden = isStart;
+  $('#sel-symbols').hidden = isStart;
+  selLabel.value = o.text || '';
+  $('#sel-help').textContent = isNode
+    ? 'Type q_0 for q₀. Click the canvas and type to rename quickly.'
+    : isStart ? 'Drag the arrow tail to move it. Delete removes the initial state.'
+    : 'Symbols separated by commas, e.g. a,b. Use ε for an empty move.';
+  if (PAGE === 'tm' && !isNode && !isStart) $('#sel-help').innerHTML = 'Rules like <span class="math">0→x,R</span> (read → write, move) or <span class="math">x→R</span>. Type <code>-&gt;</code> for the arrow and use ␣ for blank. Use “; new rule” to stack another rule on this arrow.';
+  if (PAGE === 'tm' && isNode) $('#sel-help').textContent = 'Name a state q_{accept} or q_{reject} to make it halt. Click the canvas and type to rename quickly.';
+  if (PAGE === 'pda' && !isNode && !isStart) $('#sel-help').innerHTML = 'Rules like <span class="math">0,ε→0</span>: read, pop → push. Type <code>-&gt;</code> for the arrow. Use “; new rule” to stack another rule on this arrow.';
+  if (isNode) {
+    $('#sel-accept').checked = !!o.accept;
+    $('#sel-initial').checked = doc.links.some((l) => l.type === 'start' && l.node === o.id);
+  }
+}
+selLabel.addEventListener('input', () => { const o = selectedObj(); if (o) setLabel(o, selLabel.value); });
+selLabel.addEventListener('blur', () => { if (commitTimer) commit(); });
+$('#sel-symbols').addEventListener('mousedown', (e) => { if (e.target.closest('[data-ins]')) e.preventDefault(); });
+$('#sel-symbols').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ins]'); const o = selectedObj();
+  if (!b || !o) return;
+  const ins = b.dataset.ins;
+  const focused = document.activeElement === selLabel;
+  const s = focused ? selLabel.selectionStart : selLabel.value.length, en = focused ? selLabel.selectionEnd : selLabel.value.length;
+  selLabel.value = selLabel.value.slice(0, s) + ins + selLabel.value.slice(en);
+  selLabel.focus(); selLabel.setSelectionRange(s + ins.length, s + ins.length);
+  setLabel(o, selLabel.value);
+});
+$('#sel-accept').addEventListener('change', (e) => { const o = selectedObj(); if (o) { o.accept = e.target.checked; commit(); } });
+$('#sel-initial').addEventListener('change', (e) => { const o = selectedObj(); if (o) { setInitial(o, e.target.checked); commit(); } });
+$('#sel-straighten').addEventListener('click', () => { const o = selectedObj(); if (o) { o.perp = 0; o.par = 0.5; commit(); updateSelectionPanel(); } });
+$('#sel-del').addEventListener('click', deleteSelected);
+$('#btn-delete').addEventListener('click', deleteSelected);
+
+
+/* =====================================================================
+   Export
+   ===================================================================== */
+let exportFmt = 'png';
+let exportURL = null;
+function exportPalette() { return { ink: '#111111', accent: '#111111', hl: '#111111', hlSoft: '#ffffff', startFill: '#d4e1ff', acceptFill: '#cdeedb' }; }
+const exportColors = () => $('#export-colors').checked;
+function exportBox(pad) {
+  const bb = new BBoxPen();
+  drawDiagram(bb, { P: exportPalette(), nodeFill: 'none' });
+  const b = bb.box;
+  if (!b) return null;
+  return { x: Math.floor(b.x - pad), y: Math.floor(b.y - pad), w: Math.ceil(b.w + 2 * pad), h: Math.ceil(b.h + 2 * pad) };
+}
+function makePNG(scale, bg) {
+  const b = exportBox(16);
+  if (!b) return null;
+  const c = document.createElement('canvas');
+  c.width = Math.round(b.w * scale); c.height = Math.round(b.h * scale);
+  const x = c.getContext('2d');
+  if (bg === 'white') { x.fillStyle = '#ffffff'; x.fillRect(0, 0, c.width, c.height); }
+  x.setTransform(scale, 0, 0, scale, -b.x * scale, -b.y * scale);
+  x.lineCap = 'round'; x.lineJoin = 'round';
+  drawDiagram(new CanvasPen(x), { P: exportPalette(), nodeFill: bg === 'white' ? '#ffffff' : 'none', colors: exportColors() });
+  return c;
+}
+function makeSVG() {
+  const b = exportBox(16);
+  if (!b) return null;
+  const pen = new SvgPen();
+  drawDiagram(pen, { P: exportPalette(), nodeFill: '#ffffff', colors: exportColors() });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${b.w}" height="${b.h}" viewBox="${b.x} ${b.y} ${b.w} ${b.h}" stroke-linecap="round" stroke-linejoin="round">\n<!-- Made with DeltaDraw -->\n<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#ffffff"/>\n${pen.out.join('\n')}\n</svg>\n`;
+}
+function makeTikZ() {
+  const pen = new TikzPen();
+  drawDiagram(pen, { P: exportPalette(), nodeFill: 'none', colors: exportColors() });
+  return `% Made with DeltaDraw. Needs \\usepackage{tikz} in your preamble.\n\\begin{center}\n\\begin{tikzpicture}[line width=0.8pt]\n${pen.out.join('\n')}\n\\end{tikzpicture}\n\\end{center}\n`;
+}
+function openExport() {
+  if (!doc.nodes.length) { toast('Nothing to export yet. Draw a state first.'); return; }
+  $('#export-modal').hidden = false;
+  updateExport();
+  $('#export-download').focus();
+}
+function closeExport() { $('#export-modal').hidden = true; canvas.focus({ preventScroll: true }); }
+function updateExport() {
+  for (const b of $$('[data-fmt]')) b.setAttribute('aria-pressed', String(b.dataset.fmt === exportFmt));
+  const isPng = exportFmt === 'png', isSvg = exportFmt === 'svg', isCode = exportFmt === 'tex' || exportFmt === 'jff';
+  $('#png-opts').hidden = !isPng;
+  $('#color-opt').hidden = exportFmt === 'jff';
+  $('#export-preview').hidden = isCode;
+  $('#export-code').hidden = !(isCode || isSvg);
+  $('#export-copy').hidden = !(isCode || isSvg);
+  const img = $('#export-img');
+  if (exportURL) { URL.revokeObjectURL(exportURL); exportURL = null; }
+  const note = $('#export-note');
+  if (isPng) {
+    const scale = Number(document.querySelector('input[name="png-scale"]:checked').value);
+    const bg = document.querySelector('input[name="png-bg"]:checked').value;
+    const c = makePNG(scale, bg);
+    img.src = c.toDataURL('image/png');
+    img.style.width = Math.round(c.width / scale) + 'px';
+    note.textContent = `${c.width} × ${c.height} px. If the download does not start, right-click the image and choose “Save image as”.`;
+    $('#export-download').textContent = 'Download PNG';
+  } else if (isSvg) {
+    const svg = makeSVG();
+    exportURL = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    img.style.width = '';
+    $('#export-code').value = svg;
+    note.textContent = 'Scalable vector image. Works in Word, PowerPoint, Inkscape and browsers.';
+    $('#export-download').textContent = 'Download SVG';
+  } else if (exportFmt === 'tex') {
+    $('#export-code').value = makeTikZ();
+    note.textContent = 'Paste into your LaTeX document. Requires \\usepackage{tikz}.';
+    $('#export-download').textContent = 'Download .tex';
+  } else {
+    $('#export-code').value = makeJFF();
+    note.textContent = PAGE === 'pda' ? 'Opens in JFLAP 7 as a pushdown automaton. JFLAP starts with Z on the stack (Sipser starts with an empty stack).'
+      : PAGE === 'tm' ? 'Opens in JFLAP 7 as a Turing machine. JFLAP’s tape is infinite in both directions, so a move left from the first cell behaves differently there.'
+      : 'Opens in JFLAP 7 as a finite automaton.';
+    $('#export-download').textContent = 'Download .jff';
+  }
+}
+function downloadBlob(name, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+function doExportDownload() {
+  const base = PAGE === 'pda' ? 'deltadraw-pda' : PAGE === 'tm' ? 'deltadraw-tm' : 'deltadraw-automaton';
+  if (exportFmt === 'png') {
+    const scale = Number(document.querySelector('input[name="png-scale"]:checked').value);
+    const bg = document.querySelector('input[name="png-bg"]:checked').value;
+    const c = makePNG(scale, bg);
+    c.toBlob((b) => { if (b) downloadBlob(base + '.png', b); }, 'image/png');
+  } else if (exportFmt === 'svg') downloadBlob(base + '.svg', new Blob([makeSVG()], { type: 'image/svg+xml' }));
+  else if (exportFmt === 'tex') downloadBlob(base + '.tex', new Blob([makeTikZ()], { type: 'text/plain' }));
+  else downloadBlob(base + '.jff', new Blob([makeJFF()], { type: 'application/xml' }));
+}
+$('#btn-export').addEventListener('click', openExport);
+$('#export-close').addEventListener('click', closeExport);
+$('#export-modal').addEventListener('click', (e) => { if (e.target.id === 'export-modal') closeExport(); });
+for (const b of $$('[data-fmt]')) b.addEventListener('click', () => { exportFmt = b.dataset.fmt; updateExport(); });
+for (const r of $$('#png-opts input')) r.addEventListener('change', updateExport);
+$('#export-colors').addEventListener('change', updateExport);
+$('#export-download').addEventListener('click', doExportDownload);
+$('#export-copy').addEventListener('click', () => copyText($('#export-code').value, 'Copied to clipboard.'));
+
+/* ---------------- Save / open files ---------------- */
+function saveShortcut() { saveFile(); }
+function saveFile() {
+  const data = { app: 'DeltaDraw', version: 1, nodes: doc.nodes, links: doc.links, nextId: doc.nextId };
+  downloadBlob(PAGE === 'pda' ? 'deltadraw-pda.json' : PAGE === 'tm' ? 'deltadraw-tm.json' : 'deltadraw-automaton.json', new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  toast(PAGE === 'pda' ? 'Saved as deltadraw-pda.json' : PAGE === 'tm' ? 'Saved as deltadraw-tm.json' : 'Saved as deltadraw-automaton.json');
+}
+function parseJFF(text) {
+  const xml = new DOMParser().parseFromString(text, 'application/xml');
+  if (xml.querySelector('parsererror')) throw new Error('bad xml');
+  const auto = xml.querySelector('automaton') || xml;
+  const states = [...auto.querySelectorAll('state, block')];
+  if (!states.length) throw new Error('no states');
+  const d = { nodes: [], links: [], nextId: 1 };
+  const idMap = new Map();
+  const nameOf = (nm) => { const m = /^([A-Za-z]+)(\d+)$/.exec(nm); return m ? (m[2].length > 1 ? `${m[1]}_{${m[2]}}` : `${m[1]}_${m[2]}`) : nm; };
+  for (const s of states) {
+    const id = d.nextId++;
+    idMap.set(s.getAttribute('id'), id);
+    const get = (tag) => { const e = s.querySelector(tag); return e ? e.textContent : null; };
+    d.nodes.push({ id, x: Number(get('x')) || 0, y: Number(get('y')) || 0, text: nameOf(s.getAttribute('name') || 'q' + s.getAttribute('id')), accept: !!s.querySelector('final') });
+    if (s.querySelector('initial')) d.links.push({ id: d.nextId++, type: 'start', node: id, dx: -70, dy: 0, text: '' });
+  }
+  const pairs = new Map();
+  for (const t of auto.querySelectorAll('transition')) {
+    const from = idMap.get(t.querySelector('from').textContent.trim()), to = idMap.get(t.querySelector('to').textContent.trim());
+    const txt = (tag) => { const e = t.querySelector(tag); return e && e.textContent.trim() ? e.textContent.trim() : 'ε'; };
+    const blank = (tag) => { const e = t.querySelector(tag); return e && e.textContent.trim() ? e.textContent.trim() : '␣'; };
+    const sym = t.querySelector('move') ? `${blank('read')}→${blank('write')},${txt('move')}`
+      : t.querySelector('pop') || t.querySelector('push') ? `${txt('read')},${txt('pop')}→${txt('push')}` : txt('read');
+    const k = from + '>' + to;
+    if (!pairs.has(k)) pairs.set(k, []);
+    if (!pairs.get(k).includes(sym)) pairs.get(k).push(sym);
+  }
+  for (const [k, syms] of pairs) {
+    const [from, to] = k.split('>').map(Number);
+    const text = syms.some((x) => x.includes('→')) ? syms.join('; ') : syms.join(',');
+    if (from === to) d.links.push({ id: d.nextId++, type: 'self', node: from, angle: -Math.PI / 2, text });
+    else d.links.push({ id: d.nextId++, type: 'link', from, to, par: 0.5, perp: pairs.has(to + '>' + from) ? 30 : 0, text });
+  }
+  return d;
+}
+function validDoc(d) {
+  return d && Array.isArray(d.nodes) && Array.isArray(d.links) && d.nodes.every((n) => typeof n.id === 'number' && isFinite(n.x) && isFinite(n.y));
+}
+$('#btn-save').addEventListener('click', saveFile);
+$('#btn-open').addEventListener('click', () => $('#file-input').click());
+$('#file-input').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  if (/\.png$/i.test(f.name) || f.type === 'image/png') {
+    // An answer image from exam mode (or an export) carries its drawing inside the PNG
+    const rb = new FileReader();
+    rb.onload = () => {
+      try {
+        const raw = pngReadText(new Uint8Array(rb.result), 'DeltaDraw');
+        if (!raw) throw new Error('none');
+        const d = JSON.parse(b64decodeUTF8(raw));
+        if (!isDocShape(d)) throw new Error('invalid');
+        loadDoc(d);
+        const who = d.name ? `${d.name}, ` : '';
+        const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—');
+        const extra = d.code ? ` · code ${d.code} · started ${when(d.started)} · saved ${when(d.time)}` : '';
+        toast(d.mode === 'exam' ? `Opened answer: ${who}Question ${d.question}${extra}` : `Opened ${f.name}`, 'Undo', undo);
+      } catch (err) {
+        toast('This PNG has no DeltaDraw drawing inside. Only images downloaded from DeltaDraw can be opened.');
+      }
+    };
+    rb.readAsArrayBuffer(f);
+    return;
+  }
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const text = String(rd.result);
+      let d;
+      if (/\.(jff|xml)$/i.test(f.name) || text.trim().startsWith('<')) d = parseJFF(text);
+      else d = JSON.parse(text);
+      if (!validDoc(d)) throw new Error('invalid');
+      d.nodes.forEach((n) => { n.text = n.text || ''; n.accept = !!n.accept; });
+      loadDoc(d);
+      toast(`Opened ${f.name}`, 'Undo', undo);
+    } catch (err) {
+      toast('Could not open this file. Choose a DeltaDraw .json file or a JFLAP .jff finite automaton.');
+    }
+  };
+  rd.readAsText(f);
+});
+$('#btn-new').addEventListener('click', () => {
+  if (!doc.nodes.length && !doc.links.length) return;
+  doc.nodes = []; doc.links = []; reindex(); select(null); commit(); fitView();
+  toast('Started a new drawing.', 'Undo', undo);
+});
+
+/* ---------------- Examples ---------------- */
+function makeExample(nodes, links) {
+  let id = 1;
+  const ids = {};
+  const d = { nodes: [], links: [], nextId: 1 };
+  for (const [name, x, y, acc] of nodes) { ids[name] = id; d.nodes.push({ id: id++, x, y, text: name, accept: !!acc }); }
+  for (const l of links) {
+    if (l[0] === 'start') d.links.push({ id: id++, type: 'start', node: ids[l[1]], dx: -72, dy: 0, text: '' });
+    else if (l[0] === l[1]) d.links.push({ id: id++, type: 'self', node: ids[l[0]], angle: l[3] != null ? l[3] : -Math.PI / 2, text: l[2] });
+    else d.links.push({ id: id++, type: 'link', from: ids[l[0]], to: ids[l[1]], par: 0.5, perp: l[3] || 0, text: l[2] });
+  }
+  d.nextId = id;
+  return d;
+}
+
+/* ---------------- Tool & misc buttons ---------------- */
+for (const b of $$('[data-tool]')) b.addEventListener('click', () => setTool(b.dataset.tool));
+$('#btn-undo').addEventListener('click', undo);
+$('#btn-redo').addEventListener('click', redo);
+$('#zoom-in').addEventListener('click', () => zoomAt(1.2, W / 2, H / 2));
+$('#zoom-out').addEventListener('click', () => zoomAt(1 / 1.2, W / 2, H / 2));
+$('#zoom-level').addEventListener('click', () => zoomAt(1 / view.s, W / 2, H / 2));
+$('#zoom-fit').addEventListener('click', fitView);
+$('#btn-help').addEventListener('click', () => $('#how-to').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+$('#welcome-add').addEventListener('click', () => {
+  const p = toWorld(W / 2, H / 2 - 30);
+  const n = addNode(Math.round(p.x / GRID) * GRID, Math.round(p.y / GRID) * GRID);
+  select('node', n.id); commit();
+  canvas.focus({ preventScroll: true });
+});
+$('#opt-color').addEventListener('change', (e) => {
+  settings.colorStates = e.target.checked;
+  persist();
+  render();
+});
+
+/* ---------------- Theme ---------------- */
+const THEMES = ['system', 'light', 'dark'];
+function applyTheme() {
+  const root = document.documentElement;
+  if (settings.theme === 'system') { if (root.dataset.ddTheme) { root.removeAttribute('data-theme'); delete root.dataset.ddTheme; } }
+  else { root.setAttribute('data-theme', settings.theme); root.dataset.ddTheme = '1'; }
+  $('#btn-theme').title = 'Theme: ' + (settings.theme === 'system' ? 'follows your system' : settings.theme);
+  readPalette();
+  render();
+  if (typeof paintHistory === 'function') paintHistory();
+}
+$('#btn-theme').addEventListener('click', () => {
+  settings.theme = THEMES[(THEMES.indexOf(settings.theme) + 1) % THEMES.length];
+  applyTheme();
+  store.set(THEME_KEY, settings.theme);
+  persist();
+  toast('Theme: ' + (settings.theme === 'system' ? 'same as your system' : settings.theme));
+});
+try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readPalette(); render(); }); } catch (e) { /* old browsers */ }
+try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => paintHistory()); } catch (e) { /* old browsers */ }
+new MutationObserver(() => { readPalette(); render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ---------------- Toast & clipboard ---------------- */
+let toastTimer = 0;
+function toast(msg, actionLabel, action) {
+  const t = $('#toast');
+  $('#toast-msg').textContent = msg;
+  const b = $('#toast-action');
+  b.hidden = !actionLabel;
+  b.textContent = actionLabel || '';
+  b.onclick = () => { t.hidden = true; if (action) action(); };
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, actionLabel ? 6000 : 3200);
+}
+function copyText(text, msg) {
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    toast(ok ? msg : 'Could not copy automatically. Select the text and press Ctrl+C.');
+  };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast(msg), fallback);
+    else fallback();
+  } catch (e) { fallback(); }
+}
+
+/* ---------------- PNG metadata: the drawing travels inside the image ---------------- */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+  return t;
+})();
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+function b64encodeUTF8(s) {
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64decodeUTF8(b) {
+  const bin = atob(b), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function pngAddText(png, keyword, text) {
+  const enc = (s) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
+  const kw = enc(keyword), tx = enc(text);
+  const body = new Uint8Array(4 + kw.length + 1 + tx.length); // chunk type + data
+  body.set(enc('tEXt'), 0); body.set(kw, 4); body[4 + kw.length] = 0; body.set(tx, 5 + kw.length);
+  const chunk = new Uint8Array(body.length + 8);
+  const dv = new DataView(chunk.buffer);
+  dv.setUint32(0, body.length - 4);
+  chunk.set(body, 4);
+  dv.setUint32(4 + body.length, crc32(body));
+  const iend = png.length - 12; // IEND is always the last 12 bytes
+  const out = new Uint8Array(png.length + chunk.length);
+  out.set(png.subarray(0, iend), 0); out.set(chunk, iend); out.set(png.subarray(iend), iend + chunk.length);
+  return out;
+}
+function pngReadText(png, keyword) {
+  if (png.length < 20 || png[1] !== 0x50 || png[2] !== 0x4e || png[3] !== 0x47) return null;
+  const dv = new DataView(png.buffer, png.byteOffset, png.byteLength);
+  let p = 8;
+  while (p + 8 <= png.length) {
+    const len = dv.getUint32(p);
+    const type = String.fromCharCode(png[p + 4], png[p + 5], png[p + 6], png[p + 7]);
+    if (type === 'tEXt') {
+      const d = png.subarray(p + 8, p + 8 + len), z = d.indexOf(0);
+      let kw = ''; for (let i = 0; i < z; i++) kw += String.fromCharCode(d[i]);
+      if (kw === keyword) { let s = ''; for (let i = z + 1; i < d.length; i++) s += String.fromCharCode(d[i]); return s; }
+    }
+    if (type === 'IEND') break;
+    p += 12 + len;
+  }
+  return null;
+}
+function isDocShape(d) {
+  return !!d && Array.isArray(d.nodes) && Array.isArray(d.links) && d.nodes.every((n) => typeof n.id === 'number' && isFinite(n.x) && isFinite(n.y));
+}
+
+
+
+/* ---------- Shared by the history panels (PDA stack history, TM tape history) ---------- */
+const HIST_FONT = {
+  sym: 'italic 18px "STIX Two Text","Times New Roman",Times,serif', symSub: 'italic 12.5px "STIX Two Text","Times New Roman",Times,serif',
+  lab: 'italic 15px "STIX Two Text","Times New Roman",Times,serif', labSub: 'italic 11px "STIX Two Text","Times New Roman",Times,serif',
+  ui: '12px "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif', uiB: '600 12.5px "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif',
+  title: '600 15px "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif', sub: '13px "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif',
+};
+const HIST_LIGHT = { bg: '#ffffff', ink: '#151922', muted: '#5a6375', line: '#d7dce5', ok: '#1a7a45', okSoft: '#dff2e6', bad: '#b8321f', hl: '#c27400', hlSoft: '#ffefcc', cell: '#ffffff' };
+const histMeasure = document.createElement('canvas').getContext('2d');
+// A text made of segments { t, math?, bold?, color? }: math segments are labels (with subscripts), the rest is plain UI text.
+function segsWidth(x, segs, big) {
+  let w = 0;
+  for (const s of segs) {
+    if (!s.math) { x.font = s.bold ? HIST_FONT.uiB : HIST_FONT.ui; w += x.measureText(s.t).width; continue; }
+    for (const r of parseLabel(s.t)) { x.font = r.k ? (big ? HIST_FONT.symSub : HIST_FONT.labSub) : (big ? HIST_FONT.sym : HIST_FONT.lab); w += x.measureText(r.t).width; }
+  }
+  return w;
+}
+function drawSegs(x, segs, cx, y, pal, big) {
+  let px = cx - segsWidth(x, segs, big) / 2;
+  x.textBaseline = 'alphabetic'; x.textAlign = 'left';
+  for (const s of segs) {
+    x.fillStyle = pal[s.color || 'ink'];
+    if (!s.math) { x.font = s.bold ? HIST_FONT.uiB : HIST_FONT.ui; x.fillText(s.t, px, y); px += x.measureText(s.t).width; continue; }
+    for (const r of parseLabel(s.t)) {
+      x.font = r.k ? (big ? HIST_FONT.symSub : HIST_FONT.labSub) : (big ? HIST_FONT.sym : HIST_FONT.lab);
+      x.fillText(r.t, px, y + (r.k === 1 ? 4 : r.k === 2 ? -7 : 0));
+      px += x.measureText(r.t).width;
+    }
+  }
+}
+function roundRect(x, l, t, w, h, r) {
+  x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath();
+}
+function histPalette() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = (n) => cs.getPropertyValue(n).trim();
+  return { bg: g('--surface'), ink: g('--ink'), muted: g('--muted'), line: g('--line'), ok: g('--ok'), okSoft: g('--ok-soft'), bad: g('--bad'), hl: g('--hl'), hlSoft: g('--hl-soft'), cell: g('--surface') };
+}
+// Wrap text into lines that fit maxW (for the image's caption)
+function wrapText(x, text, maxW) {
+  const out = []; let line = '';
+  for (const w of text.split(' ')) { const t = line ? line + ' ' + w : w; if (line && x.measureText(t).width > maxW) { out.push(line); line = w; } else line = t; }
+  if (line) out.push(line);
+  return out;
+}
+
+/* =====================================================================
+   Turing machines (Sipser 3.1)
+   An arrow carries rules "a→b,R" (read a, write b, move right) or "a→R" (leave a as it is), and
+   "0,1→R" means the same move for each symbol. Several rules on one arrow are separated by ";".
+   The tape is infinite to the right; moving left from the first cell leaves the head in place.
+   States named q_accept / q_reject (or drawn as accepting) halt. A missing rule means "go to q_reject".
+   ===================================================================== */
+const BLANK = '␣';
+const tmCmp = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true });
+function tmSym(raw) {
+  const t = convertSymbols(raw || '').trim();
+  if (t === '␣' || t === '□' || t === '⊔') return BLANK;
+  if ([...t].length === 1 || /^.(_.|_\{[^}]*\})$/u.test(t)) return t;
+  return null;
+}
+function parseTMRule(raw) {
+  const t = convertSymbols(raw).trim();
+  const k = t.indexOf('→');
+  const bad = (why) => ({ error: `“${raw.trim()}” ${why}` });
+  if (k < 0) return bad('is not a rule of the form a→b,R');
+  const reads = t.slice(0, k).split(',').map(tmSym);
+  const right = t.slice(k + 1).split(',').map((x) => x.trim());
+  if (!reads.length || reads.some((x) => x === null)) return bad('must read single symbols, separated by commas (use ␣ for blank)');
+  if (right.length > 2) return bad('has too many commas after the arrow; write a→b,R');
+  const move = right[right.length - 1].toUpperCase();
+  if (!['L', 'R', 'S'].includes(move)) return bad('must end with a move: L, R or S');
+  let write = null;
+  if (right.length === 2) { write = tmSym(right[0]); if (write === null) return bad('must write a single symbol'); }
+  return { reads, write, move };
+}
+const isAcceptName = (n) => /accept/i.test(plainLabel(n.text || ''));
+const isRejectName = (n) => /reject/i.test(plainLabel(n.text || ''));
+function buildTM(src = doc) {
+  const halts = (n) => (n.accept || isAcceptName(n) || isRejectName(n) ? 1 : 0); // halting states are listed last
+  const nodes = [...src.nodes].sort((a, b) => halts(a) - halts(b) || tmCmp(plainLabel(a.text || ''), plainLabel(b.text || '')) || a.id - b.id);
+  const ids = nodes.map((n) => n.id);
+  const names = new Map(nodes.map((n) => [n.id, n.text || '?']));
+  const startLink = src.links.find((l) => l.type === 'start' && names.has(l.node));
+  const start = startLink ? startLink.node : null;
+  const accept = new Set(nodes.filter((n) => n.accept || isAcceptName(n)).map((n) => n.id));
+  const reject = new Set(nodes.filter((n) => isRejectName(n) && !accept.has(n.id)).map((n) => n.id));
+  const rules = [], warnings = [], notes = [];
+  const delta = new Map(); // "state|symbol" -> [rules]
+  for (const l of src.links) {
+    if (l.type === 'start') continue;
+    const from = l.type === 'self' ? l.node : l.from, to = l.type === 'self' ? l.node : l.to;
+    if (!names.has(from) || !names.has(to)) continue;
+    const where = `${plainLabel(names.get(from))} → ${plainLabel(names.get(to))}`;
+    const text = (l.text || '').trim();
+    if (!text) { warnings.push(`The arrow ${where} has no label.`); continue; }
+    let line = -1;
+    for (const part of text.split(';')) {
+      if (!part.trim()) continue;
+      line++;
+      const r = parseTMRule(part);
+      if (r.error) { warnings.push(`Arrow ${where}: ${r.error}.`); continue; }
+      for (const a of r.reads) {
+        const rule = { from, to, link: l.id, line, read: a, write: r.write === null ? a : r.write, move: r.move, text: part.trim() };
+        rules.push(rule);
+        const key = from + '|' + a;
+        if (!delta.has(key)) delta.set(key, []);
+        if (!delta.get(key).some((x) => x.to === rule.to && x.write === rule.write && x.move === rule.move)) delta.get(key).push(rule);
+      }
+    }
+  }
+  let det = true;
+  for (const [key, list] of delta) if (list.length > 1) {
+    det = false;
+    const [q, a] = key.split('|');
+    notes.push(`Nondeterministic: ${plainLabel(names.get(Number(q)))} has ${list.length} rules for ${plainLabel(a)}.`);
+  }
+  for (const r of rules) if (accept.has(r.from) || reject.has(r.from)) { warnings.push(`${plainLabel(names.get(r.from))} halts, so its outgoing rules are never used.`); break; }
+  if (nodes.length && start == null) notes.push('No start state yet: tick “Initial state” on one state.');
+  if (nodes.length && !accept.size) notes.push('No accept state: name one q_accept (or make it a double circle).');
+  if ([...accept].some((id) => reject.has(id))) warnings.push('A state cannot both accept and reject.');
+  // Γ: every symbol read or written, plus the blank. Σ: guessed as the symbols the machine never writes over something else.
+  const gamma = new Set([BLANK]), written = new Set();
+  for (const r of rules) { gamma.add(r.read); gamma.add(r.write); if (r.write !== r.read) written.add(r.write); }
+  const sigma = [...gamma].filter((x) => x !== BLANK && !written.has(x)).sort(tmCmp);
+  return { ids, names, start, accept, reject, rules, delta, det, warnings, notes, gamma: [...gamma].sort((a, b) => (a === BLANK) - (b === BLANK) || tmCmp(a, b)), sigma };
+}
+
+/* ---------- Running ---------- */
+// A configuration: { q, head, tape (array of symbols; cells never visited are blank), t (rule used), prev }
+function tmMoves(M, c) {
+  const a = c.head < c.tape.length ? c.tape[c.head] : BLANK;
+  return { a, list: M.delta.get(c.q + '|' + a) || [] };
+}
+function tmApply(c, r) {
+  const tape = c.tape.slice();
+  while (tape.length <= c.head) tape.push(BLANK);
+  tape[c.head] = r.write;
+  const head = r.move === 'L' ? Math.max(0, c.head - 1) : r.move === 'R' ? c.head + 1 : c.head;
+  return { q: r.to, head, tape, t: r, prev: c };
+}
+// result: { verdict: 'accept'|'reject'|'loop'|'limit', reason, path (configurations to step through), steps, truncated }
+const tmKey = (x) => x.q + '|' + x.head + '|' + x.tape.join('\u0001').replace(/(\u0001␣)+$|^␣$/, '');
+function runTM(M, input, limit = 10000, keep = 5000) {
+  if (M.start == null) return { verdict: 'none', path: [] };
+  let c = { q: M.start, head: 0, tape: input.slice(), t: null, prev: null };
+  if (M.det) {
+    const path = [c], seenAt = new Map();
+    const done = (o, n) => ({ ...o, path, steps: n, truncated: path.length < n + 1 });
+    for (let n = 0; ; n++) {
+      if (M.accept.has(c.q)) return done({ verdict: 'accept' }, n);
+      if (M.reject.has(c.q)) return done({ verdict: 'reject', reason: 'state' }, n);
+      const { a, list } = tmMoves(M, c);
+      if (!list.length) return done({ verdict: 'reject', reason: 'norule', sym: a, at: c }, n);
+      if (n < 20000) { // a repeated configuration means the machine runs forever
+        const k = tmKey(c);
+        if (seenAt.has(k)) return done({ verdict: 'loop', first: seenAt.get(k) }, n);
+        seenAt.set(k, n);
+      }
+      if (n >= limit) return done({ verdict: 'limit' }, n);
+      c = tmApply(c, list[0]);
+      c.prev = null; // a deterministic run needs no back links
+      if (path.length < keep) path.push(c);
+    }
+  }
+  // nondeterministic: breadth-first over configurations; accept if some branch accepts
+  const seen = new Map([[tmKey(c), []]]); // key -> successor keys (the graph of configurations)
+  let level = [c], n = 0, cut = false;
+  while (level.length) {
+    const next = [];
+    for (const x of level) {
+      if (M.accept.has(x.q)) {
+        const path = [];
+        for (let y = x; y; y = y.prev) path.unshift(y);
+        return { verdict: 'accept', path, steps: path.length - 1, nondet: true };
+      }
+      if (M.reject.has(x.q)) continue;
+      const succ = seen.get(tmKey(x));
+      for (const r of tmMoves(M, x).list) {
+        const y = tmApply(x, r), k = tmKey(y);
+        succ.push(k);
+        if (!seen.has(k)) { seen.set(k, []); next.push(y); }
+      }
+    }
+    n++;
+    if (next.length && (n > limit || seen.size > 200000)) { cut = true; break; }
+    level = next;
+  }
+  if (cut) return { verdict: 'limit', path: [], steps: n, nondet: true };
+  // every reachable configuration is known: a branch runs forever exactly when the graph has a cycle
+  const color = new Map();
+  let cycle = false;
+  for (const k0 of seen.keys()) {
+    if (color.get(k0) || cycle) continue;
+    const stack = [[k0, 0]];
+    color.set(k0, 1);
+    while (stack.length && !cycle) {
+      const top = stack[stack.length - 1], succ = seen.get(top[0]);
+      if (top[1] < succ.length) {
+        const k = succ[top[1]++];
+        if (color.get(k) === 1) cycle = true;
+        else if (!color.get(k)) { color.set(k, 1); stack.push([k, 0]); }
+      } else { color.set(top[0], 2); stack.pop(); }
+    }
+  }
+  return cycle ? { verdict: 'loop', path: [], steps: n, nondet: true } : { verdict: 'reject', reason: 'allbranches', path: [], steps: n, nondet: true };
+}
+function tmInput(text) {
+  const raw = (text || '').replace(/\s+/g, '');
+  if (raw === '' || raw === 'ε') return [];
+  return [...convertSymbols(raw)].map((x) => (x === '□' || x === '⊔' ? BLANK : x));
+}
+// Sipser's notation u q v: the head is on the first symbol of v
+function configHTML(M, c) {
+  const u = c.tape.slice(0, c.head).map(labelHTML).join('');
+  const rest = c.tape.slice(c.head);
+  const v = (rest.length ? rest : [BLANK]).map(labelHTML).join('');
+  return `${u}<span class="st">${labelHTML(M.names.get(c.q))}</span>${v}`;
+}
+function configPlain(M, c) {
+  const rest = c.tape.slice(c.head);
+  return c.tape.slice(0, c.head).map(plainLabel).join('') + ' ' + plainLabel(M.names.get(c.q)) + ' ' + (rest.length ? rest : [BLANK]).map(plainLabel).join('');
+}
+
+/* ---------- Info card ---------- */
+function updateMachineInfo() {
+  const M = buildTM();
+  const el = $('#machine-info');
+  if (!doc.nodes.length) { el.innerHTML = '<p class="small-text muted">Empty canvas. Double-click to add your first state, or load an example.</p>'; return; }
+  let html = `<div class="machine-head"><span class="type-badge ${M.det ? 'dfa' : 'nfa'}">${M.det ? 'TM' : 'NTM'}</span><span class="small-text">${M.ids.length} state${M.ids.length === 1 ? '' : 's'} · ${M.rules.length} rule${M.rules.length === 1 ? '' : 's'}</span></div>`;
+  html += `<p class="sigma">Σ = {${M.sigma.map(labelHTML).join(', ')}} &nbsp; Γ = {${M.gamma.map(labelHTML).join(', ')}}</p>`;
+  const notes = [...M.notes];
+  if (!M.reject.size && M.ids.length) notes.push('No q_reject drawn: as in Sipser, a missing rule means the machine rejects.');
+  if (notes.length || M.warnings.length) html += '<ul class="notes">' + notes.map((n) => `<li>${escHTML(n)}</li>`).join('') + M.warnings.map((w) => `<li class="warn">${escHTML(w)}</li>`).join('') + '</ul>';
+  el.innerHTML = html;
+}
+function checkWalkStillValid() { /* no walkthroughs on this page */ }
+
+/* ---------- Formal definition ---------- */
+function tableData() {
+  const M = buildTM();
+  const order = (id) => M.ids.indexOf(id);
+  const rows = [...M.delta.entries()].map(([key, list]) => { const [q, a] = key.split('|'); return { q: Number(q), a, outs: list }; })
+    .sort((x, y) => order(x.q) - order(y.q) || (x.a === BLANK) - (y.a === BLANK) || tmCmp(x.a, y.a));
+  return { M, rows };
+}
+function updateTable() {
+  const { M, rows } = tableData();
+  const def = $('#pda-def'), wrap = $('#table-wrap');
+  if (!M.ids.length) { def.innerHTML = ''; wrap.innerHTML = '<p class="small-text muted">No states yet.</p>'; return; }
+  const set = (a) => `{${a.join(', ')}}`;
+  const nm = (ids) => [...ids].sort((a, b) => M.ids.indexOf(a) - M.ids.indexOf(b)).map((id) => labelHTML(M.names.get(id)));
+  def.innerHTML = `<div><span class="math">Q</span> = <span class="math">${set(M.ids.map((id) => labelHTML(M.names.get(id))))}</span></div>
+    <div><span class="math">Σ</span> = <span class="math">${set(M.sigma.map(labelHTML))}</span>, &nbsp;<span class="math">Γ</span> = <span class="math">${set(M.gamma.map(labelHTML))}</span></div>
+    <div>start <span class="math">${M.start != null ? labelHTML(M.names.get(M.start)) : '—'}</span>, accept <span class="math">${nm(M.accept).join(', ') || '—'}</span>, reject <span class="math">${nm(M.reject).join(', ') || 'q<sub>reject</sub> (not drawn)'}</span></div>
+    <p class="small-text muted">Σ is a guess: the symbols the machine never writes over another symbol. Γ also has the blank ␣.</p>`;
+  if (!rows.length) { wrap.innerHTML = '<p class="small-text muted">No transitions yet.</p>'; return; }
+  const out = (r) => `(${labelHTML(M.names.get(r.to))}, ${labelHTML(r.write)}, ${r.move})`;
+  wrap.innerHTML = `<table class="ttable trace"><thead><tr><th>δ(q, a)</th><th>${M.det ? '(r, b, move)' : 'set of (r, b, move)'}</th></tr></thead><tbody>${rows.map((r) =>
+    `<tr><td class="lbl">δ(${labelHTML(M.names.get(r.q))}, ${labelHTML(r.a)})</td><td class="lbl">${M.det ? out(r.outs[0]) : `{${r.outs.map(out).join(', ')}}`}</td></tr>`).join('')}</tbody></table>
+    <p class="small-text muted">In state q reading a, the machine goes to r, writes b and moves. Pairs not listed go to q<sub>reject</sub>.</p>`;
+}
+function tableMarkdown() {
+  const { M, rows } = tableData();
+  const out = (r) => `(${plainLabel(M.names.get(r.to))}, ${plainLabel(r.write)}, ${r.move})`;
+  return '| δ(q, a) | result |\n|---|---|\n' + rows.map((r) => `| δ(${plainLabel(M.names.get(r.q))}, ${plainLabel(r.a)}) | ${M.det ? out(r.outs[0]) : '{' + r.outs.map(out).join(', ') + '}'} |`).join('\n');
+}
+function tableLaTeX() {
+  const { M, rows } = tableData();
+  const tex = (x) => (x === BLANK ? '\\sqcup' : labelTeX(x));
+  const out = (r) => `(${labelTeX(M.names.get(r.to))}, ${tex(r.write)}, \\mathrm{${r.move}})`;
+  return '\\begin{tabular}{l|l}\n$\\delta(q, a)$ & result \\\\ \\hline\n' + rows.map((r) =>
+    `$\\delta(${labelTeX(M.names.get(r.q))}, ${tex(r.a)})$ & $${M.det ? out(r.outs[0]) : '\\{' + r.outs.map(out).join(', ') + '\\}'}$ \\\\`).join('\n') + '\n\\end{tabular}';
+}
+$('#table-copy').addEventListener('click', () => copyText(tableMarkdown(), 'Table copied as Markdown.'));
+$('#table-copy-tex').addEventListener('click', () => copyText(tableLaTeX(), 'Table copied as LaTeX.'));
+
+/* ---------- Run UI ---------- */
+let playTimer = 0;
+function stopPlay() { if (playTimer) { clearInterval(playTimer); playTimer = 0; } $('#sim-play').textContent = '▶ Play'; }
+function resetSim(fromEdit) {
+  stopPlay();
+  if (!sim) return;
+  sim = null;
+  if (fromEdit) { $('#sim-out').innerHTML = ''; $('#trace-box').hidden = true; }
+  for (const id of ['#sim-back', '#sim-step', '#sim-play']) { const b = $(id); if (b) b.disabled = false; }
+  updateHistory();
+  render();
+}
+const stepLimit = () => { const v = Math.round(Number($('#tm-limit').value)); return isFinite(v) && v >= 10 ? Math.min(v, 1000000) : 10000; };
+function startSim() {
+  const M = buildTM();
+  if (M.start == null) { toast(doc.nodes.length ? 'Mark a start state first (tick “Initial state”).' : 'Draw a Turing machine first, or load an example.'); return null; }
+  const input = tmInput($('#sim-input').value);
+  const res = runTM(M, input, stepLimit());
+  const path = res.path.length ? res.path : [{ q: M.start, head: 0, tape: input.slice(), t: null }];
+  const steps = path.map((c) => ({ set: new Set([c.q]), used: c.t ? new Set([c.t.link]) : null, rule: c.t ? new Map([[c.t.link, c.t.line]]) : null, c }));
+  const outside = [...new Set(input.filter((x) => !M.sigma.includes(x)))];
+  sim = { M, input, res, steps, idx: 0, outside: M.sigma.length ? outside : [] };
+  return sim;
+}
+function tapeHTML(c) {
+  const end = Math.max(c.tape.length, c.head + 1) + 1;
+  const cells = [];
+  for (let i = 0; i < end; i++) {
+    const s = i < c.tape.length ? c.tape[i] : BLANK;
+    cells.push(`<span class="cell${s === BLANK ? ' blank' : ''}${i === c.head ? ' head' : ''}">${labelHTML(s)}</span>`);
+  }
+  return `<div class="tape tm-tape" aria-label="Tape; the head is on cell ${c.head + 1}">${cells.join('')}<span class="cell blank">…</span></div>`;
+}
+function showSim() {
+  const out = $('#sim-out');
+  if (!sim) { out.innerHTML = ''; $('#trace-box').hidden = true; updateHistory(); render(); return; }
+  const { M, steps, idx, res } = sim;
+  const c = steps[idx].c, done = idx === steps.length - 1;
+  const showable = res.path.length > 0;
+  let verdict = '', lines = '';
+  const t = c.t;
+  const atEnd = t && t.move === 'L' && idx > 0 && steps[idx - 1].c.head === 0;
+  const move = t ? `Move: read <span class="math">${labelHTML(t.read)}</span>, write <span class="math">${labelHTML(t.write)}</span>, move ${t.move === 'L' ? 'left' : t.move === 'R' ? 'right' : 'nowhere (stay)'}${atEnd ? ' <span class="muted">(already at the left end, so the head stays)</span>' : ''}` : 'Start: the input is on the tape and the head is on the first cell.';
+  if (!done || !showable) verdict = showable ? `<span class="pill run">Step ${idx} of ${steps.length - 1}${res.truncated ? '+' : ''}</span>` : '';
+  if (done || !showable) {
+    const n = res.steps.toLocaleString();
+    if (res.verdict === 'accept') verdict = `<span class="pill ok">✓ Accepted</span><span class="small-text">after ${n} step${res.steps === 1 ? '' : 's'}</span>`;
+    else if (res.verdict === 'reject') {
+      verdict = `<span class="pill bad">✕ Rejected</span><span class="small-text">${res.nondet ? 'every branch halts and rejects' : `after ${n} step${res.steps === 1 ? '' : 's'}`}</span>`;
+      if (res.reason === 'norule') lines += `<div class="sim-line">No rule for <span class="math">${labelHTML(M.names.get(res.at.q))}</span> reading <span class="math">${labelHTML(res.sym)}</span>, so the machine goes to <span class="math">q<sub>reject</sub></span> (Sipser leaves these arrows out of his diagrams).</div>`;
+    } else if (res.verdict === 'loop') {
+      verdict = '<span class="pill run">Loops forever</span>';
+      lines += res.nondet
+        ? '<div class="sim-line">No branch accepts, and some branch repeats a configuration, so it runs forever. The machine does not accept, but it does not halt on every branch either.</div>'
+        : `<div class="sim-line">The configuration after step ${res.steps.toLocaleString()} is the same as after step ${res.first.toLocaleString()}, so the machine repeats these steps forever. It never accepts or rejects.</div>`;
+    } else if (res.verdict === 'limit') {
+      verdict = `<span class="pill run">Still running after ${stepLimit().toLocaleString()} steps</span>`;
+      lines += `<div class="sim-line">${res.nondet ? 'No branch accepted yet.' : 'The machine has not halted.'} It may run forever, or it may need more steps (raise the limit below). No program can tell for every machine whether it halts: that is the halting problem (Chapter 4).</div>`;
+    }
+  }
+  if (showable) {
+    lines = `<div class="sim-line">State <span class="math">${labelHTML(M.names.get(c.q))}</span>${M.accept.has(c.q) ? ' <span class="muted">(accept)</span>' : M.reject.has(c.q) ? ' <span class="muted">(reject)</span>' : ''}</div><div class="sim-line move">${move}</div><div class="sim-line cfg-line">Configuration: ${configHTML(M, c)}</div>` + (done ? lines : '');
+    if (res.truncated && done) lines += `<div class="sim-line muted small-text">Only the first ${steps.length.toLocaleString()} steps can be stepped through.</div>`;
+    if (res.nondet && done && res.verdict === 'accept') lines += '<div class="sim-line muted small-text">This is a nondeterministic machine; these are the steps of one accepting branch.</div>';
+  }
+  if (sim.outside.length) lines += `<div class="sim-line muted small-text">Note: ${sim.outside.map(labelHTML).join(', ')} ${sim.outside.length > 1 ? 'are' : 'is'} not in Σ = {${M.sigma.map(labelHTML).join(', ')}}, the input alphabet guessed from the drawing, so this may not be a meaningful input.</div>`;
+  out.innerHTML = `${showable ? tapeHTML(c) : ''}<div class="row">${verdict}</div><div class="sim-lines">${lines}</div>`;
+  const tape = out.querySelector('.tm-tape .head');
+  if (tape) { try { tape.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* old browsers */ } }
+  const box = $('#trace-box');
+  if (showable) {
+    box.hidden = false;
+    const MAXL = 400, from = Math.max(0, Math.min(idx - MAXL / 2, steps.length - MAXL));
+    const list = steps.slice(from, from + MAXL);
+    $('#tm-trace').start = from;
+    $('#tm-trace').innerHTML = list.map((s, k) => `<li class="${from + k === idx ? 'cur' : ''}">${configHTML(M, s.c)}</li>`).join('');
+    const cur = $('#tm-trace').querySelector('.cur');
+    if (cur && box.open) { try { cur.scrollIntoView({ block: 'nearest' }); } catch (e) { /* ignore */ } }
+  } else box.hidden = true;
+  $('#sim-back').disabled = idx === 0;
+  $('#sim-step').disabled = done;
+  $('#sim-play').disabled = done && !playTimer;
+  updateHistory();
+  render();
+}
+
+/* ---------- Tape history: one row per step, in a wide panel under the drawing ----------
+   Like Sipser's tableau (Section 7.4): each row is the tape after that step. The step, state and rule stay pinned on the left
+   and the cell numbers on top; only the visible part is drawn, so long runs and wide tapes stay fast. */
+const TAPE = { CW: 30, RH: 26, HEAD: 24, PAD: 10, MAXROWS: 9, PNG_ROWS: 150 };
+let histLay = null, histFor = null, histRaf = 0, histIdx = -1;
+const tapeAt = (c, i) => (i < c.tape.length ? c.tape[i] : BLANK);
+function tapeRuleSegs(t) { return t ? [{ t: t.read, math: true }, { t: '→', color: 'muted' }, { t: t.write, math: true }, { t: ',' + t.move, color: 'muted' }] : [{ t: 'start', color: 'muted' }]; }
+// What to show beside the last row (and the row a loop goes back to)
+function tapeMarks(s) {
+  const { res, steps } = s, last = steps.length - 1, marks = new Map();
+  if (res.truncated) return marks;
+  if (res.verdict === 'accept') marks.set(last, { t: '✓', color: 'ok' });
+  else if (res.verdict === 'reject') marks.set(last, { t: '✕', color: 'bad' });
+  else if (res.verdict === 'loop') { marks.set(last, { t: '↺', color: 'hl' }); if (res.first != null) marks.set(res.first, { t: '↺', color: 'hl' }); }
+  else if (res.verdict === 'limit') marks.set(last, { t: '…', color: 'muted' });
+  return marks;
+}
+function tapeLayout(s, maxRows = Infinity) {
+  const { M } = s;
+  const steps = s.steps.slice(0, maxRows);
+  let ncell = 1;
+  for (const st of steps) ncell = Math.max(ncell, st.c.tape.length, st.c.head + 1);
+  ncell += 1; // one blank cell after the furthest one used
+  const syms = new Set([...M.gamma, ...s.input]);
+  let cw = TAPE.CW;
+  for (const a of syms) cw = Math.max(cw, Math.ceil(segsWidth(histMeasure, [{ t: a, math: true }], true)) + 12);
+  const stepW = Math.max(46, Math.ceil(segsWidth(histMeasure, [{ t: String(s.steps.length - 1) + ' ✓', bold: true }])) + 16);
+  let stateW = 44, ruleW = 54;
+  for (const id of M.ids) stateW = Math.max(stateW, Math.ceil(segsWidth(histMeasure, [{ t: M.names.get(id), math: true }])) + 16);
+  for (const r of M.rules) ruleW = Math.max(ruleW, Math.ceil(segsWidth(histMeasure, tapeRuleSegs(r))) + 16);
+  const G = stepW + stateW + ruleW + 6;
+  return { steps, ncell, cw, stepW, stateW, ruleW, G, W: G + ncell * cw + TAPE.PAD, H: TAPE.HEAD + steps.length * TAPE.RH + 6, marks: tapeMarks(s) };
+}
+// Draw the visible part: cells scrolled by (sx, sy) inside a vw × vh window; the left columns and the header stay put.
+function drawTape(x, lay, { sx, sy, vw, vh, pal, cur, y0 = 0 }) {
+  const { steps, cw, G, ncell, stepW, stateW, ruleW, marks } = lay, RH = TAPE.RH, H0 = TAPE.HEAD;
+  x.save();
+  x.translate(0, y0);
+  x.fillStyle = pal.bg; x.fillRect(0, 0, vw, vh);
+  const k0 = Math.max(0, Math.floor(sy / RH)), k1 = Math.min(steps.length - 1, Math.floor((sy + vh - H0) / RH));
+  const i0 = Math.max(0, Math.floor(sx / cw)), i1 = Math.min(ncell - 1, Math.floor((sx + vw - G) / cw));
+  const rowY = (k) => H0 + k * RH - sy, cellX = (i) => G + i * cw - sx;
+  // the current row: a band across everything
+  if (cur != null && cur >= k0 && cur <= k1) { x.fillStyle = pal.hlSoft; x.globalAlpha = 0.45; x.fillRect(0, rowY(cur), vw, RH); x.globalAlpha = 1; }
+  // cells (clipped to the area right of the pinned columns and below the header)
+  x.save();
+  x.beginPath(); x.rect(G, H0, vw - G, vh - H0); x.clip();
+  x.lineWidth = 1;
+  for (let k = k0; k <= k1; k++) {
+    const c = steps[k].c, prev = k ? steps[k - 1].c : null, y = rowY(k);
+    for (let i = i0; i <= i1; i++) {
+      const a = tapeAt(c, i), cx = cellX(i);
+      const changed = prev && tapeAt(prev, i) !== a, head = i === c.head;
+      x.fillStyle = head ? pal.hlSoft : changed ? pal.okSoft : pal.cell; x.fillRect(cx, y, cw, RH);
+      x.strokeStyle = pal.line; x.strokeRect(cx + 0.5, y + 0.5, cw - 1, RH - 1);
+      if (changed && !head) { x.strokeStyle = pal.ok; x.lineWidth = 1.5; x.strokeRect(cx + 1.25, y + 1.25, cw - 2.5, RH - 2.5); x.lineWidth = 1; }
+      if (a === BLANK) drawSegs(x, [{ t: '␣', color: 'muted' }], cx + cw / 2, y + 17, pal);
+      else drawSegs(x, [{ t: a, math: true }], cx + cw / 2, y + 18, pal, true);
+    }
+    // the head on top, so its outline is not covered by a neighbour's
+    if (c.head >= i0 && c.head <= i1) { x.strokeStyle = pal.hl; x.lineWidth = 2; x.strokeRect(cellX(c.head) + 1.5, y + 1.5, cw - 3, RH - 3); x.lineWidth = 1; }
+  }
+  x.restore();
+  // pinned left columns: step, state, rule
+  x.save();
+  x.beginPath(); x.rect(0, H0, G, vh - H0); x.clip();
+  x.fillStyle = pal.bg; x.fillRect(0, H0, G, vh - H0);
+  if (cur != null && cur >= k0 && cur <= k1) { x.fillStyle = pal.hlSoft; x.globalAlpha = 0.45; x.fillRect(0, rowY(cur), G, RH); x.globalAlpha = 1; }
+  for (let k = k0; k <= k1; k++) {
+    const c = steps[k].c, y = rowY(k) + 17, m = marks.get(k);
+    const num = [{ t: String(k), bold: true, color: k === cur ? 'hl' : undefined }];
+    if (m) num.push({ t: ' ' + m.t, bold: true, color: m.color });
+    drawSegs(x, num, 6 + stepW / 2, y, pal);
+    drawSegs(x, [{ t: lay.names.get(c.q), math: true }], stepW + stateW / 2, y, pal);
+    drawSegs(x, tapeRuleSegs(c.t), stepW + stateW + ruleW / 2, y, pal);
+  }
+  x.restore();
+  // pinned header: column titles and cell numbers (the current head's cell number highlighted)
+  x.fillStyle = pal.bg; x.fillRect(0, 0, vw, H0);
+  x.strokeStyle = pal.line; x.beginPath(); x.moveTo(0, H0 - 0.5); x.lineTo(vw, H0 - 0.5); x.moveTo(G - 3.5, 0); x.lineTo(G - 3.5, vh); x.stroke();
+  const hy = 16;
+  drawSegs(x, [{ t: 'step', color: 'muted' }], 6 + stepW / 2, hy, pal);
+  drawSegs(x, [{ t: 'state', color: 'muted' }], stepW + stateW / 2, hy, pal);
+  drawSegs(x, [{ t: 'rule', color: 'muted' }], stepW + stateW + ruleW / 2, hy, pal);
+  const headNow = cur != null && steps[cur] ? steps[cur].c.head : -1;
+  x.save(); x.beginPath(); x.rect(G, 0, vw - G, H0); x.clip();
+  for (let i = i0; i <= i1; i++) drawSegs(x, [{ t: String(i), color: i === headNow ? 'hl' : 'muted', bold: i === headNow }], cellX(i) + cw / 2, hy, pal);
+  x.restore();
+  // the current row's outline
+  if (cur != null && cur >= k0 && cur <= k1) { x.save(); x.beginPath(); x.rect(0, H0, vw, vh - H0); x.clip(); x.strokeStyle = pal.hl; x.lineWidth = 2; roundRect(x, 1, rowY(cur) + 1, vw - 2, RH - 2, 5); x.stroke(); x.restore(); }
+  x.restore();
+}
+const histShown = () => !!(sim && sim.res && sim.res.path.length > 0);
+function historySummary(s, plain) {
+  const { res, M } = s;
+  const n = res.steps, N = n.toLocaleString(), steps = `${N} step${n === 1 ? '' : 's'}`;
+  const nm = (q) => (plain ? plainLabel(M.names.get(q)) : `<span class="math">${labelHTML(M.names.get(q))}</span>`);
+  const sy = (a) => (plain ? plainLabel(a) : `<span class="math">${labelHTML(a)}</span>`);
+  const qrej = plain ? 'q_reject' : '<span class="math">q<sub>reject</sub></span>';
+  let head, rest;
+  if (res.verdict === 'accept') { head = 'Accepted'; rest = `after ${steps}${res.nondet ? ' (one accepting branch of a nondeterministic machine)' : ''}`; }
+  else if (res.verdict === 'reject') { head = 'Rejected'; rest = `after ${steps}${res.reason === 'norule' ? `: no rule for ${nm(res.at.q)} reading ${sy(res.sym)}, so the machine goes to ${qrej}` : ''}`; }
+  else if (res.verdict === 'loop') { head = 'Loops forever'; rest = `the configuration after step ${N} is the same as after step ${res.first.toLocaleString()}`; }
+  else { head = 'Still running'; rest = `after ${steps} (the step limit)`; }
+  if (res.truncated) rest += `; only the first ${s.steps.length.toLocaleString()} steps are kept`;
+  if (!plain) return `<b>${head}</b> · ${rest}`;
+  const word = s.input.length ? s.input.map(plainLabel).join('') : 'ε';
+  return `Turing machine on input ${word}: ${head.toLowerCase()}, ${rest}.`;
+}
+function updateHistory() {
+  const dock = $('#hist-dock');
+  if (!histShown()) { dock.hidden = true; histLay = null; histFor = null; histIdx = -1; return; }
+  if (dock.hidden) {
+    dock.hidden = false;
+    // the drawing area just got shorter: refit the drawing if part of it is now out of view
+    requestAnimationFrame(() => {
+      resize();
+      const bb = diagramBBox();
+      if (!bb) return;
+      const l = bb.x * view.s + view.tx, t = bb.y * view.s + view.ty, r = (bb.x + bb.w) * view.s + view.tx, b = (bb.y + bb.h) * view.s + view.ty;
+      if (l < 0 || t < 0 || r > W || b > H - 30) fitView();
+    });
+  }
+  if (histFor !== sim) { histFor = sim; histLay = tapeLayout(sim); histLay.names = sim.M.names; histIdx = -1; $('#hist-sub').innerHTML = historySummary(sim); }
+  $('#hist-body').hidden = !!settings.histCollapsed;
+  $('#hist-toggle').setAttribute('aria-expanded', String(!settings.histCollapsed));
+  if (settings.histCollapsed) return;
+  const sc = $('#hist-scroll'), sp = $('#hist-spacer');
+  sp.style.width = histLay.W + 'px'; sp.style.height = histLay.H + 'px';
+  sc.style.height = Math.min(histLay.H, TAPE.HEAD + TAPE.MAXROWS * TAPE.RH + 6) + 'px';
+  // keep the current row, and the head's cell in it, in view
+  if (histIdx !== sim.idx) {
+    histIdx = sim.idx;
+    const c = sim.steps[sim.idx].c, vh = sc.clientHeight, vw = sc.clientWidth;
+    const top = sim.idx * TAPE.RH, viewRows = vh - TAPE.HEAD;
+    if (top < sc.scrollTop) sc.scrollTop = Math.max(0, top - TAPE.RH);
+    else if (top + TAPE.RH > sc.scrollTop + viewRows) sc.scrollTop = top + 2 * TAPE.RH - viewRows;
+    const hx = c.head * histLay.cw, viewCols = vw - histLay.G;
+    if (hx < sc.scrollLeft) sc.scrollLeft = Math.max(0, hx - 2 * histLay.cw);
+    else if (hx + histLay.cw > sc.scrollLeft + viewCols) sc.scrollLeft = hx + 3 * histLay.cw - viewCols;
+  }
+  paintHistory();
+}
+function paintHistory() {
+  if (histRaf) return;
+  histRaf = requestAnimationFrame(() => {
+    histRaf = 0;
+    if (!histLay || $('#hist-dock').hidden || settings.histCollapsed) return;
+    const sc = $('#hist-scroll'), cv = $('#hist-canvas');
+    const vw = Math.max(1, sc.clientWidth), vh = Math.max(1, sc.clientHeight), r = window.devicePixelRatio || 1;
+    cv.style.width = vw + 'px'; cv.style.height = vh + 'px';
+    if (cv.width !== Math.round(vw * r) || cv.height !== Math.round(vh * r)) { cv.width = Math.round(vw * r); cv.height = Math.round(vh * r); }
+    const x = cv.getContext('2d');
+    x.setTransform(r, 0, 0, r, 0, 0);
+    drawTape(x, histLay, { sx: sc.scrollLeft, sy: sc.scrollTop, vw, vh, pal: histPalette(), cur: sim ? sim.idx : null });
+  });
+}
+// The image: a caption, then the whole table (at most PNG_ROWS rows)
+function makeTapePNG(scale = 2) {
+  const lay = tapeLayout(sim, TAPE.PNG_ROWS);
+  lay.names = sim.M.names;
+  const W = Math.max(lay.W, 520);
+  histMeasure.font = HIST_FONT.sub;
+  let cap = historySummary(sim, true);
+  if (sim.steps.length > TAPE.PNG_ROWS) cap += ` The image shows the first ${TAPE.PNG_ROWS} of ${sim.steps.length.toLocaleString()} rows.`;
+  const caption = wrapText(histMeasure, cap, W - 2 * 16);
+  const headH = 16 + 22 + caption.length * 18;
+  const c = document.createElement('canvas');
+  c.width = Math.round(W * scale); c.height = Math.round((headH + lay.H) * scale);
+  const x = c.getContext('2d');
+  x.scale(scale, scale);
+  x.fillStyle = HIST_LIGHT.bg; x.fillRect(0, 0, W, headH + lay.H);
+  x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  x.fillStyle = HIST_LIGHT.ink; x.font = HIST_FONT.title; x.fillText('Tape history', 16, 16 + 12);
+  x.fillStyle = HIST_LIGHT.muted; x.font = HIST_FONT.sub;
+  caption.forEach((l, i) => x.fillText(l, 16, 16 + 34 + i * 18));
+  drawTape(x, lay, { sx: 0, sy: 0, vw: W, vh: lay.H, pal: HIST_LIGHT, cur: null, y0: headH });
+  return c;
+}
+$('#hist-scroll').addEventListener('scroll', paintHistory, { passive: true });
+if ('ResizeObserver' in window) new ResizeObserver(() => paintHistory()).observe($('#hist-scroll'));
+$('#hist-canvas').addEventListener('click', (e) => {
+  if (!sim || !histLay) return;
+  const r = $('#hist-canvas').getBoundingClientRect();
+  const y = e.clientY - r.top;
+  if (y < TAPE.HEAD) return;
+  const k = Math.floor((y - TAPE.HEAD + $('#hist-scroll').scrollTop) / TAPE.RH);
+  if (k >= 0 && k < sim.steps.length && k !== sim.idx) { stopPlay(); sim.idx = k; showSim(); }
+});
+$('#hist-scroll').addEventListener('keydown', (e) => {
+  if (!sim || !['ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) return;
+  e.preventDefault();
+  stopPlay();
+  const last = sim.steps.length - 1;
+  const k = { ArrowUp: sim.idx - 1, ArrowDown: sim.idx + 1, Home: 0, End: last, PageUp: sim.idx - 10, PageDown: sim.idx + 10 }[e.key];
+  const kk = Math.max(0, Math.min(last, k));
+  if (kk !== sim.idx) { sim.idx = kk; showSim(); }
+});
+$('#hist-toggle').addEventListener('click', () => { settings.histCollapsed = !settings.histCollapsed; persist(); histIdx = -1; updateHistory(); });
+$('#hist-png').addEventListener('click', () => {
+  if (!histShown()) return;
+  makeTapePNG(2).toBlob((b) => { if (b) downloadBlob('deltadraw-tm-tape-history.png', b); }, 'image/png');
+});
+$('.workspace').classList.add('has-dock');
+$('#sim-run').addEventListener('click', () => { stopPlay(); if (startSim()) { sim.idx = sim.steps.length - 1; showSim(); } });
+$('#sim-step').addEventListener('click', () => {
+  stopPlay();
+  if (!sim) { if (!startSim()) return; } else if (sim.idx < sim.steps.length - 1) sim.idx++;
+  showSim();
+});
+$('#sim-back').addEventListener('click', () => { stopPlay(); if (sim && sim.idx > 0) { sim.idx--; showSim(); } });
+$('#sim-play').addEventListener('click', () => {
+  if (playTimer) { stopPlay(); showSim(); return; }
+  if (!sim || sim.idx === sim.steps.length - 1) { if (!startSim()) return; }
+  $('#sim-play').textContent = '❚❚ Pause';
+  playTimer = setInterval(() => {
+    if (!sim || sim.idx >= sim.steps.length - 1) { stopPlay(); showSim(); return; }
+    sim.idx++; showSim();
+  }, 380);
+  showSim();
+});
+$('#sim-reset').addEventListener('click', () => { stopPlay(); sim = null; showSim(); $('#sim-back').disabled = false; $('#sim-step').disabled = false; $('#sim-play').disabled = false; });
+$('#sim-input').addEventListener('input', () => { if (sim) { stopPlay(); sim = null; showSim(); $('#sim-back').disabled = false; $('#sim-step').disabled = false; $('#sim-play').disabled = false; } });
+$('#sim-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#sim-run').click(); } });
+$('#tm-limit').addEventListener('change', () => { settings.tmLimit = stepLimit(); persist(); if (sim) { stopPlay(); sim = null; showSim(); } });
+$('#batch-run').addEventListener('click', () => {
+  const M = buildTM();
+  if (M.start == null) { toast('Mark a start state first (tick “Initial state”).'); return; }
+  const lines = $('#batch-input').value.split('\n').map((s) => s.trim()).filter((s) => s.length);
+  let okc = 0, loop = 0;
+  $('#batch-out').innerHTML = lines.map((line) => {
+    const r = runTM(M, tmInput(line), stepLimit(), 1);
+    if (r.verdict === 'accept') okc++; else if (r.verdict !== 'reject') loop++;
+    const label = r.verdict === 'accept' ? '✓ accept' : r.verdict === 'reject' ? '✕ reject' : r.verdict === 'loop' ? '∞ loops forever' : `… no halt in ${stepLimit().toLocaleString()} steps`;
+    return `<li><span>${escHTML(line)}</span><span class="${r.verdict === 'accept' ? 'ok' : r.verdict === 'reject' ? 'bad' : ''}">${label}</span></li>`;
+  }).join('');
+  $('#batch-sum').textContent = lines.length ? `${okc} accepted, ${lines.length - okc - loop} rejected${loop ? `, ${loop} did not halt` : ''}` : 'Enter some strings first.';
+});
+for (const tb of $$('.tab')) {
+  tb.addEventListener('click', () => {
+    for (const x of $$('.tab')) { x.setAttribute('aria-selected', String(x === tb)); $('#' + x.getAttribute('aria-controls')).hidden = x !== tb; }
+  });
+}
+
+/* ---------- Examples (Sipser, Examples 3.7 and 3.9) ---------- */
+const TM_EXAMPLES = {
+  pow2: () => makeExample([['q_1', 0, 0], ['q_2', 220, 0], ['q_3', 440, 0], ['q_4', 660, 0], ['q_5', 440, -200], ['q_{accept}', 220, -200], ['q_{reject}', 0, 230]],
+    [['start', 'q_1'], ['q_1', 'q_2', '0→␣,R'], ['q_1', 'q_{reject}', '␣→R; x→R'], ['q_2', 'q_2', 'x→R', Math.PI / 2], ['q_2', 'q_{accept}', '␣→R'], ['q_2', 'q_3', '0→x,R'],
+      ['q_3', 'q_3', 'x→R', Math.PI / 2], ['q_3', 'q_4', '0→R', 30], ['q_4', 'q_3', '0→x,R', 30], ['q_4', 'q_4', 'x→R', 0], ['q_3', 'q_5', '␣→L'], ['q_4', 'q_{reject}', '␣→R', -150],
+      ['q_5', 'q_5', '0,x→L', -Math.PI / 2], ['q_5', 'q_2', '␣→R']]),
+  wsharpw: () => makeExample([['q_1', 0, 0], ['q_2', 220, -190], ['q_3', 220, 190], ['q_4', 460, -190], ['q_5', 460, 190], ['q_6', 680, 0], ['q_7', 340, 0], ['q_8', 0, 260], ['q_{accept}', 0, 460]],
+    [['start', 'q_1'], ['q_1', 'q_2', '0→x,R'], ['q_1', 'q_3', '1→x,R'], ['q_1', 'q_8', '#→R'], ['q_2', 'q_2', '0,1→R', -Math.PI / 2], ['q_3', 'q_3', '0,1→R', Math.PI / 2],
+      ['q_2', 'q_4', '#→R'], ['q_3', 'q_5', '#→R'], ['q_4', 'q_4', 'x→R', -Math.PI / 2], ['q_5', 'q_5', 'x→R', Math.PI / 2], ['q_4', 'q_6', '0→x,L'], ['q_5', 'q_6', '1→x,L'],
+      ['q_6', 'q_6', '0,1,x→L', 0], ['q_6', 'q_7', '#→L'], ['q_7', 'q_7', '0,1→L', Math.PI / 2], ['q_7', 'q_1', 'x→R'], ['q_8', 'q_8', 'x→R', Math.PI], ['q_8', 'q_{accept}', '␣→R']]),
+  zeroone: () => makeExample([['q_1', 0, 0], ['q_2', 240, 0], ['q_3', 240, 210], ['q_4', 0, 210], ['q_{accept}', -240, 210]],
+    [['start', 'q_1'], ['q_1', 'q_2', '0→x,R'], ['q_2', 'q_2', '0,y→R', -Math.PI / 2], ['q_2', 'q_3', '1→y,L'], ['q_3', 'q_3', '0,y→L', 0], ['q_3', 'q_1', 'x→R'],
+      ['q_1', 'q_4', 'y→R'], ['q_4', 'q_4', 'y→R', Math.PI / 2], ['q_4', 'q_{accept}', '␣→R'], ['q_1', 'q_{accept}', '␣→R']]),
+};
+const TM_TESTS = { pow2: '0000', wsharpw: '01#01', zeroone: '0011' };
+$('#examples').addEventListener('change', (e) => {
+  const k = e.target.value;
+  e.target.value = '';
+  if (!TM_EXAMPLES[k]) return;
+  loadDoc(TM_EXAMPLES[k]());
+  $('#sim-input').value = TM_TESTS[k];
+  toast('Example loaded. Press Play or Step to watch it run.', 'Undo', undo);
+});
+$('#welcome-example').addEventListener('click', () => { loadDoc(TM_EXAMPLES.pow2()); $('#sim-input').value = TM_TESTS.pow2; toast('Example loaded. Press New to clear it.', 'Undo', undo); });
+
+/* ---------- JFLAP export (turing) ---------- */
+function makeJFF() {
+  const M = buildTM();
+  const ids = new Map(doc.nodes.map((n, i) => [n.id, i]));
+  const name = (n) => escXML(plainLabel(n.text || '').replace(/[₀-₉]/g, (c) => String(c.charCodeAt(0) - 8320)));
+  let s = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with DeltaDraw.--><structure>\n\t<type>turing</type>\n\t<automaton>\n';
+  for (const n of doc.nodes) {
+    s += `\t\t<state id="${ids.get(n.id)}" name="${name(n)}">\n\t\t\t<x>${f2(n.x)}</x>\n\t\t\t<y>${f2(n.y)}</y>\n${M.start === n.id ? '\t\t\t<initial/>\n' : ''}${M.accept.has(n.id) ? '\t\t\t<final/>\n' : ''}\t\t</state>\n`;
+  }
+  const el = (tag, x) => (x === BLANK ? `<${tag}/>` : `<${tag}>${escXML(plainLabel(x))}</${tag}>`);
+  for (const r of M.rules) {
+    s += `\t\t<transition>\n\t\t\t<from>${ids.get(r.from)}</from>\n\t\t\t<to>${ids.get(r.to)}</to>\n\t\t\t${el('read', r.read)}\n\t\t\t${el('write', r.write)}\n\t\t\t<move>${r.move}</move>\n\t\t</transition>\n`;
+  }
+  return s + '\t</automaton>\n</structure>\n';
+}
+
+/* ---------- Practice: Turing machines (Sipser Exercise 3.8 and examples) ---------- */
+const prCount = (w, c) => { let n = 0; for (const x of w) if (x === c) n++; return n; };
+const PR_EXERCISES = [
+  { id: 't-end0', title: 'Ends with 0', lang: '{w ∈ {0,1}* | w ends with 0}', sigma: '01', maxLen: 10, test: (w) => w.endsWith('0'),
+    hints: ['Move right over the input until the blank after it.', 'Step back one cell and look at the last symbol.'],
+    solution: () => makeExample([['q_1', 0, 0], ['q_2', 220, 0], ['q_{accept}', 440, 0]],
+      [['start', 'q_1'], ['q_1', 'q_1', '0,1→R'], ['q_1', 'q_2', '␣→L'], ['q_2', 'q_{accept}', '0→R']]) },
+  { id: 't-0n1n', title: '0ⁿ1ⁿ', lang: '{0<sup>n</sup>1<sup>n</sup> | n ≥ 0}', sigma: '01', maxLen: 10, test: (w) => /^0*1*$/.test(w) && prCount(w, '0') === prCount(w, '1'),
+    hints: ['Cross off a 0 (write x), go right to the first 1 and cross it off (write y), then go back.', 'Stop going back when you see an x: the next cell is the leftmost 0 that is left.', 'When no 0 is left, check that only y’s remain.'],
+    solution: () => TM_EXAMPLES.zeroone() },
+  { id: 't-equal', title: 'Equal numbers of 0s and 1s', lang: '{w ∈ {0,1}* | w has equally many 0s and 1s}', sigma: '01', maxLen: 10, test: (w) => prCount(w, '0') === prCount(w, '1'),
+    hints: ['Sipser, Exercise 3.8(a). Repeatedly cross off one 0 and one 1, in any order.', 'The head cannot see the left end of the tape. Mark the first cell with a special symbol (for example a or b instead of x) so you know where to turn around.', 'Accept when a full pass finds only crossed-off symbols.'],
+    solution: () => makeExample([['q_0', 0, 0], ['q_1', 260, 0], ['q_2', 520, -170], ['q_3', 520, 170], ['q_4', 780, 0], ['q_{accept}', 0, 230]],
+      [['start', 'q_0'], ['q_0', 'q_2', '0→a,R', -70], ['q_0', 'q_3', '1→b,R', 70], ['q_0', 'q_{accept}', '␣→R'], ['q_1', 'q_1', 'x→R', -Math.PI / 2], ['q_1', 'q_2', '0→x,R'], ['q_1', 'q_3', '1→x,R'], ['q_1', 'q_{accept}', '␣→R'],
+        ['q_2', 'q_2', '0,x→R', -Math.PI / 2], ['q_2', 'q_4', '1→x,L'], ['q_3', 'q_3', '1,x→R', Math.PI / 2], ['q_3', 'q_4', '0→x,L'], ['q_4', 'q_4', '0,1,x→L', 0], ['q_4', 'q_1', 'a,b→R']]) },
+  { id: 't-anbncn', title: 'aⁿbⁿcⁿ', lang: '{a<sup>n</sup>b<sup>n</sup>c<sup>n</sup> | n ≥ 0}', sigma: 'abc', maxLen: 9, test: (w) => /^a*b*c*$/.test(w) && prCount(w, 'a') === prCount(w, 'b') && prCount(w, 'b') === prCount(w, 'c'),
+    hints: ['Extend the 0ⁿ1ⁿ machine: each round crosses off one a, one b and one c.', 'Use different marks (x, y, z) so each phase knows what to skip.', 'When no a is left, check that only y’s and then z’s remain.'],
+    solution: () => makeExample([['q_1', 0, 0], ['q_2', 220, 0], ['q_3', 440, 0], ['q_4', 330, 200], ['q_5', 0, 200], ['q_6', 0, 380], ['q_{accept}', 220, 380]],
+      [['start', 'q_1'], ['q_1', 'q_2', 'a→x,R'], ['q_2', 'q_2', 'a,y→R', -Math.PI / 2], ['q_2', 'q_3', 'b→y,R'], ['q_3', 'q_3', 'b,z→R', -Math.PI / 2], ['q_3', 'q_4', 'c→z,L'], ['q_4', 'q_4', 'a,b,y,z→L', Math.PI / 2], ['q_4', 'q_1', 'x→R'],
+        ['q_1', 'q_5', 'y→R'], ['q_1', 'q_{accept}', '␣→R'], ['q_5', 'q_5', 'y→R', Math.PI], ['q_5', 'q_6', 'z→R'], ['q_6', 'q_6', 'z→R', Math.PI], ['q_6', 'q_{accept}', '␣→R']]) },
+  { id: 't-pal', title: 'Palindromes', lang: '{w ∈ {0,1}* | w = w<sup>R</sup>}', sigma: '01', maxLen: 10, test: (w) => w === [...w].reverse().join(''),
+    hints: ['Erase the first symbol (write ␣) and remember it in the state.', 'Run to the right end, step back, and check that the last symbol is the same. Erase it too. If you find a blank there, the middle was reached.', 'Return to the left end, which is now a blank, and repeat. Accept when nothing is left.'],
+    solution: () => makeExample([['q_1', 0, 0], ['q_2', 220, -160], ['q_3', 220, 160], ['q_4', 440, -160], ['q_5', 440, 160], ['q_6', 660, 0], ['q_{accept}', 0, 240]],
+      [['start', 'q_1'], ['q_1', 'q_2', '0→␣,R'], ['q_1', 'q_3', '1→␣,R'], ['q_1', 'q_{accept}', '␣→R'], ['q_2', 'q_2', '0,1→R', -Math.PI / 2], ['q_2', 'q_4', '␣→L'], ['q_3', 'q_3', '0,1→R', Math.PI / 2], ['q_3', 'q_5', '␣→L'],
+        ['q_4', 'q_6', '0→␣,L; ␣→L'], ['q_5', 'q_6', '1→␣,L; ␣→L'], ['q_6', 'q_6', '0,1→L', 0], ['q_6', 'q_1', '␣→R']]) },
+  { id: 't-wsharpw', title: 'w#w', lang: '{w#w | w ∈ {0,1}*}', sigma: '01#', maxLen: 7, test: (w) => { const m = /^([01]*)#([01]*)$/.exec(w); return !!m && m[1] === m[2]; },
+    hints: ['Sipser, Example 3.9: zig-zag across the #, crossing off matching symbols.', 'Remember the crossed-off symbol in the state (one branch for 0, one for 1).', 'When all symbols left of # are crossed off, check that the right side is crossed off too.'],
+    solution: () => TM_EXAMPLES.wsharpw() },
+  { id: 't-pow2', title: '0 repeated 2ⁿ times', lang: '{0<sup>2<sup>n</sup></sup> | n ≥ 0}', sigma: '0', maxLen: 40, test: (w) => w.length > 0 && (w.length & (w.length - 1)) === 0,
+    hints: ['Sipser, Example 3.7: each pass crosses off every other 0, halving the count.', 'If one 0 is left, accept. If the count is odd and more than one, reject.'],
+    solution: () => TM_EXAMPLES.pow2() },
+];
+const PR_WHAT = 'Turing machine';
+function prRun(d, w) { const r = runTM(buildTM(d), tmInput(w), 20000, 1); return { accepted: r.verdict === 'accept', halted: r.verdict === 'accept' || r.verdict === 'reject', verdict: r.verdict }; }
+/* ---------- Practice inside the page: each exercise has its own drawing ---------- */
+const PR_KEY = `deltadraw:${PAGE}-practice:v1`;
+var pr = { cur: PR_EXERCISES[0].id, active: false, // var: persist() may look at it before this line runs
+  slots: {}, solved: {}, help: {}, free: null, hints: {} };
+try {
+  const s = JSON.parse(store.get(PR_KEY) || 'null');
+  if (s && typeof s === 'object') pr = { ...pr, ...s, active: false };
+  if (!PR_EXERCISES.some((e) => e.id === pr.cur)) pr.cur = PR_EXERCISES[0].id;
+} catch (e) { /* ignore */ }
+const prEx = () => PR_EXERCISES.find((e) => e.id === pr.cur);
+const prDoc = () => ({ nodes: doc.nodes.map((n) => ({ ...n })), links: doc.links.map((l) => ({ ...l })), nextId: doc.nextId });
+function prSave() { const { active, ...rest } = pr; store.set(PR_KEY, JSON.stringify(rest)); }
+function prFresh(d) { loadDoc(d); history.stack = [snapshot()]; history.idx = 0; $('#btn-undo').disabled = true; $('#btn-redo').disabled = true; }
+function prStart(id) {
+  if (pr.active) pr.slots[pr.cur] = prDoc(); else { pr.free = prDoc(); pr.active = true; }
+  pr.cur = id;
+  prFresh(pr.slots[id] || { nodes: [], links: [], nextId: 1 });
+  prSave(); prRender();
+}
+function prStop() {
+  if (!pr.active) return;
+  pr.slots[pr.cur] = prDoc();
+  pr.active = false;
+  prFresh(pr.free || { nodes: [], links: [], nextId: 1 });
+  prSave(); prRender();
+  toast('Your own drawing is back.');
+}
+function prWords(sigma, maxLen) { let out = ['']; let lvl = ['']; for (let i = 0; i < maxLen; i++) { lvl = lvl.flatMap((w) => [...sigma].map((c) => w + c)); out = out.concat(lvl); } return out; }
+function prCheck(ex, d) {
+  const words = prWords(ex.sigma, ex.maxLen);
+  for (const w of words) {
+    const r = prRun(d, w), want = ex.test(w);
+    if (PAGE === 'tm' && !r.halted) return { ok: false, w, nohalt: r.verdict };
+    if (r.accepted !== want) return { ok: false, w, got: r.accepted };
+  }
+  return { ok: true, n: words.length };
+}
+function prRender() {
+  const ex = prEx(), solvedN = PR_EXERCISES.filter((e) => pr.solved[e.id]).length;
+  $('#ex-pick').innerHTML = PR_EXERCISES.map((e, k) => `<option value="${e.id}">${k + 1}. ${escHTML(e.title)}${pr.solved[e.id] ? ' ✓' : ''}</option>`).join('');
+  $('#ex-pick').value = ex.id;
+  $('#ex-progress').textContent = `${solvedN} of ${PR_EXERCISES.length} solved`;
+  $('#ex-sec-label').textContent = `Exercise ${PR_EXERCISES.indexOf(ex) + 1}`;
+  $('#ex-solved').hidden = !pr.solved[ex.id];
+  $('#ex-title').textContent = ex.title;
+  $('#ex-text').innerHTML = `Draw a ${PAGE === 'tm' ? 'Turing machine that <b>decides</b>' : 'PDA that recognizes'} <span class="lbl">L = ${ex.lang}</span>.`;
+  $('#ex-rules').textContent = `Σ = {${[...ex.sigma].join(', ')}}. Check tests every string up to length ${ex.maxLen}${PAGE === 'tm' ? ', and your machine must halt on each one' : ''}.`;
+  const shown = pr.hints[ex.id] || 0;
+  $('#ex-hints').innerHTML = ex.hints.slice(0, shown).map((h) => `<li>${escHTML(h)}</li>`).join('');
+  $('#ex-hint').disabled = shown >= ex.hints.length;
+  $('#ex-start').hidden = pr.active && pr.cur === ex.id;
+  $('#ex-start').textContent = pr.active ? 'Switch the canvas to this exercise' : 'Draw it on the canvas';
+  $('#ex-check').disabled = !(pr.active && pr.cur === ex.id);
+  $('#ex-feedback').innerHTML = '';
+  const ban = $('#pr-banner');
+  ban.hidden = !pr.active;
+  if (pr.active) {
+    const k = PR_EXERCISES.indexOf(prEx()) + 1;
+    ban.innerHTML = `<span>Practicing: <b>Exercise ${k}</b>, ${escHTML(prEx().title)}</span><span class="grow"></span><button class="btn small" id="pr-stop">Stop practicing</button>`;
+    $('#pr-stop').addEventListener('click', prStop);
+  }
+}
+$('#ex-pick').addEventListener('change', (e) => {
+  const id = e.target.value;
+  if (pr.active) prStart(id); else { pr.cur = id; prSave(); prRender(); }
+});
+const prStep = (d) => { const k = PR_EXERCISES.indexOf(prEx()) + d; if (k < 0 || k >= PR_EXERCISES.length) return; const id = PR_EXERCISES[k].id; if (pr.active) prStart(id); else { pr.cur = id; prSave(); prRender(); } };
+$('#ex-prev').addEventListener('click', () => prStep(-1));
+$('#ex-next').addEventListener('click', () => prStep(1));
+$('#ex-start').addEventListener('click', () => { prStart(pr.cur); toast(`The canvas now holds your answer to this exercise. Your own drawing is saved.`); canvas.focus({ preventScroll: true }); });
+$('#ex-hint').addEventListener('click', () => { const ex = prEx(); pr.hints[ex.id] = Math.min(ex.hints.length, (pr.hints[ex.id] || 0) + 1); pr.help[ex.id] = true; prSave(); prRender(); });
+$('#ex-solution').addEventListener('click', () => {
+  const ex = prEx();
+  if (!pr.active || pr.cur !== ex.id) prStart(ex.id);
+  pr.help[ex.id] = 'solution';
+  loadDoc(ex.solution());
+  prSave(); prRender();
+  $('#ex-feedback').innerHTML = '<span class="small-text muted">This is one possible answer. It does not count as solved; try drawing your own from scratch.</span>';
+  toast('Solution loaded. Press Undo to get your drawing back.', 'Undo', undo);
+});
+$('#ex-check').addEventListener('click', () => {
+  const ex = prEx(), out = $('#ex-feedback');
+  if (!doc.nodes.length) { out.innerHTML = '<span class="warn-text">Draw your machine on the canvas first.</span>'; return; }
+  const R = prCheck(ex, doc);
+  if (R.ok) {
+    const viaSolution = pr.help[ex.id] === 'solution';
+    if (!viaSolution) pr.solved[ex.id] = true;
+    prSave(); prRender();
+    out.innerHTML = `<span class="pill ok">✓ Correct</span><span>Your ${PR_WHAT} gives the right answer on all ${R.n.toLocaleString()} strings up to length ${ex.maxLen}${PAGE === 'tm' ? ' and halts on every one' : ''}.${viaSolution ? ' (This used the shown solution, so it is not counted as solved.)' : ''}</span><span class="small-text muted">No program can test every string: equivalence is undecidable for ${PAGE === 'tm' ? 'Turing machines (Theorem 5.4)' : 'PDAs and grammars (Exercise 5.1)'}, so the check stops at length ${ex.maxLen}.</span>`;
+    return;
+  }
+  const shown = R.w.length ? `<span class="mono">${escHTML(R.w)}</span>` : '<span class="math">ε</span>';
+  const why = R.nohalt ? `Your machine ${R.nohalt === 'loop' ? 'loops forever' : 'does not halt within 20,000 steps'} on ${shown}. A decider must halt on every input.`
+    : R.got ? `Your ${PR_WHAT} accepts ${shown}, but ${shown} is not in L.` : `${shown} is in L, but your ${PR_WHAT} does not accept it.`;
+  out.innerHTML = `<span class="pill bad">✕ Not yet</span><span>${why}</span><span class="small-text muted">This is the shortest string where your machine and L disagree.</span><button class="btn small" id="ex-try">Test ${R.w.length ? escHTML(R.w) : 'ε'} step by step</button>`;
+  $('#ex-try').addEventListener('click', () => { $('#sim-reset').click(); $('#sim-input').value = R.w.length ? R.w : 'ε'; $('#tab-test').click(); $('#sim-step').click(); });
+});
+if (location.hash === '#practice') $('#tab-practice').click();
+prRender();
+
+/* ---------------- Startup ---------------- */
+function init() {
+  readPalette();
+  let saved = null;
+  try { saved = JSON.parse(store.get(STORE_KEY) || 'null'); } catch (e) { saved = null; }
+  if (saved && saved.settings) Object.assign(settings, saved.settings);
+  const sharedTheme = store.get(THEME_KEY);
+  if (sharedTheme === 'system' || sharedTheme === 'light' || sharedTheme === 'dark') settings.theme = sharedTheme;
+  $('#app').dataset.page = PAGE;
+  applyTheme();
+  setTool('select');
+  resize();
+  $('#opt-color').checked = settings.colorStates !== false;
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) $('#welcome-tip').textContent = 'Tap “Add a state”, or pick the State tool and tap the canvas.';
+  if (saved && validDoc(saved.doc)) loadDoc(saved.doc);
+  else loadDoc({ nodes: [], links: [], nextId: 1 });
+  if (settings.tmLimit) $('#tm-limit').value = settings.tmLimit;
+  updateSelectionPanel();
+  if ('ResizeObserver' in window) new ResizeObserver(() => resize()).observe(stage);
+  else window.addEventListener('resize', resize);
+  // redraw once the label fonts arrive (canvas text needs them loaded)
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load('italic 20px "STIX Two Text"'), document.fonts.load('italic 14px "STIX Two Text"')])
+      .then(() => {
+        measureCache.clear(); fitView();
+        updateMachineInfo();
+      })
+      .catch(() => {});
+  }
+  window.DeltaDraw = { get doc() { return doc; }, get pr() { return pr; }, get sim() { return sim; }, tapeLayout, makeTapePNG, historySummary, PR_EXERCISES, prCheck, buildTM, runTM, parseTMRule, tmInput, configPlain, TM_EXAMPLES, loadDoc, linkGeom, withDoc, R, makeSVG, makeTikZ, makeJFF, makePNG, parseJFF, measureLabel };
+}
+init();
+})();
+</script>
+</body>
+</html>

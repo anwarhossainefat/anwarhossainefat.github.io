@@ -20,3 +20,4 @@ Live site: https://anwarhossainefat.github.io
 | `files/` | CV (PDF) |
 
 Plain HTML and CSS; no build step. The `.nojekyll` file tells GitHub Pages to publish the files as they are.
+

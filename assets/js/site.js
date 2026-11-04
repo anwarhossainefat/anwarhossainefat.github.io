@@ -10,12 +10,16 @@
     if (t) return t === 'dark';
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
+  function show(el, on) {
+    if (on) el.removeAttribute('hidden'); else el.setAttribute('hidden', '');
+  }
   function labelButton(btn) {
     var dark = isDark();
     btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-    btn.setAttribute('title', dark ? 'Light theme' : 'Dark theme');
-    btn.querySelector('.i-sun').hidden = !dark;
-    btn.querySelector('.i-moon').hidden = dark;
+    btn.setAttribute('title', dark ? 'Dark theme (click for light)' : 'Light theme (click for dark)');
+    /* The icon shows the current theme: sun in light mode, moon in dark mode. */
+    show(btn.querySelector('.i-sun'), !dark);
+    show(btn.querySelector('.i-moon'), dark);
   }
 
   var btn = document.querySelector('.theme-btn');

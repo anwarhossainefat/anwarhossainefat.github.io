@@ -10,11 +10,11 @@
   --accent-ink: #FFFFFF;
   --accent-soft: #E8EDFB;
   --pulse: #D9480F;
-  --gold: #A46A00;
+  --gold: #8A5800;
   --gold-soft: #FBF1DC;
 
   --t-hci: #2E7D32; --t-se: #C2410C; --t-xr: #6A1B9A; --t-sec: #AD1457;
-  --t-cv: #1565C0; --t-ml: #455A64; --t-xai: #00838F; --t-hpc: #5D4037;
+  --t-cv: #1565C0; --t-ml: #455A64; --t-xai: #00796B; --t-hpc: #5D4037;
 
   --display: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
   --body: "IBM Plex Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -28,8 +28,6 @@
     --bg: #0D1120; --surface: #151B2E; --ink: #E7EAF3; --muted: #9AA3BA; --line: #262E47;
     --accent: #95A9FF; --accent-ink: #0D1120; --accent-soft: #1C2546; --pulse: #FF8A4C;
     --gold: #F0C060; --gold-soft: #2E2716;
-    --t-hci: #3C8F40; --t-se: #CF5520; --t-xr: #8A3DBA; --t-sec: #C2306E;
-    --t-cv: #2C7BD6; --t-ml: #5F7682; --t-xai: #12959F; --t-hpc: #7D5C50;
     color-scheme: dark;
   }
 }
@@ -37,8 +35,6 @@
   --bg: #0D1120; --surface: #151B2E; --ink: #E7EAF3; --muted: #9AA3BA; --line: #262E47;
   --accent: #95A9FF; --accent-ink: #0D1120; --accent-soft: #1C2546; --pulse: #FF8A4C;
   --gold: #F0C060; --gold-soft: #2E2716;
-  --t-hci: #3C8F40; --t-se: #CF5520; --t-xr: #8A3DBA; --t-sec: #C2306E;
-  --t-cv: #2C7BD6; --t-ml: #5F7682; --t-xai: #12959F; --t-hpc: #7D5C50;
   color-scheme: dark;
 }
 
@@ -221,6 +217,7 @@ a.card-media:hover .zoom, a.card-media:focus-visible .zoom { opacity: 1; }
 @media (hover: none) { .zoom { opacity: 1; } }
 .card-body { display: grid; gap: 12px; padding: 24px 26px; align-content: start; min-width: 0; }
 .card-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.card-body h2 { font-size: 1.3rem; }
 .card-body ul:not(.tools) { margin: 0; padding-left: 1.15em; display: grid; gap: 4px; }
 .card-people { font-size: 0.93rem; color: var(--muted); }
 .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
@@ -253,6 +250,8 @@ a.card-media:hover .zoom, a.card-media:focus-visible .zoom { opacity: 1; }
 
 /* ── responsive ─────────────────────────────────────── */
 @media (max-width: 860px) {
+  .site-header { position: static; }
+  html { scroll-padding-top: 1rem; }
   .card { grid-template-columns: minmax(0, 1fr); }
   .card-media { border-right: 0; border-bottom: 1px solid var(--line); }
   .split { grid-template-columns: minmax(0, 1fr); }

@@ -13,7 +13,7 @@ Plain HTML and CSS, with no build step. Edit a file on GitHub, commit, and the s
 | `index.html` | Home: bio, research interests, **News**, selected publications, education |
 | `research.html` | Current research projects and methods |
 | `publications.html` | Full publication list with topic filters |
-| `projects.html` | DeltaDraw, the germophobia game, the HPC project |
+| `projects.html` | DeltaDraw, the germophobia game, the HPC project, SnakeGo |
 | `teaching.html` | Teaching positions, courses, supervision |
 | `service.html` | Peer review, leadership, awards, research ethics, training |
 | `files/` | CV and certificates (PDF) |

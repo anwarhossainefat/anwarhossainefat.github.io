@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Projects · Anwar Hossain Efat</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; and parallel exam timetabling with MPI.">
+<meta name="description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; parallel exam timetabling with MPI; and SnakeGo, a browser-playable game.">
 <meta name="author" content="Anwar Hossain Efat">
 <link rel="canonical" href="https://anwarhossainefat.github.io/projects">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Projects · Anwar Hossain Efat">
-<meta property="og:description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; and parallel exam timetabling with MPI.">
+<meta property="og:description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; parallel exam timetabling with MPI; and SnakeGo, a browser-playable game.">
 <meta property="og:url" content="https://anwarhossainefat.github.io/projects">
 <meta property="og:site_name" content="Anwar Hossain Efat">
 <meta property="og:locale" content="en_US">
@@ -20,7 +20,7 @@
 <meta property="og:image:alt" content="Anwar Hossain Efat, MS in Computer Science, Idaho State University. HCI, XR and software engineering.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Projects · Anwar Hossain Efat">
-<meta name="twitter:description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; and parallel exam timetabling with MPI.">
+<meta name="twitter:description" content="Projects by Anwar Hossain Efat: DeltaDraw, a Theory of Computation toolkit; a VR serious game for germophobia; parallel exam timetabling with MPI; and SnakeGo, a browser-playable game.">
 <meta name="twitter:image" content="https://anwarhossainefat.github.io/assets/img/social-card.jpg">
 <meta name="theme-color" content="#2B47B8">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
@@ -90,6 +90,23 @@
     <p>Courses become nodes in a conflict graph, and colouring the graph assigns exam days so no student has two exams on the same day. The solver runs with MPI, OpenMP, and a hybrid of both. Four constraints are added one at a time: no conflicts on the same day, a daily capacity, at least two days between conflicting exams, and room matching. Scaling and time breakdowns are measured after each one, on a synthetic university of one million students and on the Toronto benchmark, and every schedule is verified.</p>
     <ul class="tools"><li>C</li><li>MPI</li><li>OpenMP</li><li>SLURM</li><li>Up to 256 cores</li></ul>
     <div class="card-actions"><a class="btn ghost" href="research.html#hpc">About the research</a></div>
+  </div>
+</article>
+  <article class="card" id="snakego">
+  <div class="card-media"><img src="assets/img/projects/snakego.jpg" alt="SnakeGo version 2.0: a green snake on a dark grid moving past two rows of purple block walls toward an apple, with the score, mode, level, and speed shown at the top" loading="lazy" width="1200" height="743"></div>
+  <div class="card-body">
+    <div class="card-badges"><span class="tag tag-XR" title="AR/VR &amp; Games">XR</span><span class="badge status">v2.0 released Nov 2026</span><span class="badge">Began in CS 5539</span></div>
+    <h2>SnakeGo</h2>
+    <p class="card-people">A modern take on the classic Snake game, playable in the browser</p>
+    <p>First built as a 2D game project for CS 5539: Introduction to Computer Game Development, with three levels. Version 2.0 fixes bugs, redraws the visuals, and adds new levels, a second mode, sound, and phone support. It runs in any browser on a computer or phone.</p>
+    <ul>
+          <li>Eight levels built from text maps, from open fields to a maze</li>
+          <li>Campaign and Free play modes, with saved high scores for every level and speed</li>
+          <li>Three speeds with score multipliers, and a watermelon bonus every fourth apple</li>
+          <li>Generated sound effects, and swipe controls on phones</li>
+        </ul>
+    <ul class="tools"><li>GameMaker</li><li>GML</li><li>HTML5</li></ul>
+    <div class="card-actions"><a class="btn primary" href="https://anwarhossainefat.github.io/SnakeGo/" target="_blank" rel="noopener">Play SnakeGo</a><a class="btn ghost" href="https://github.com/anwarhossainefat/SnakeGo" target="_blank" rel="noopener">Source code</a></div>
   </div>
 </article>
 </div>

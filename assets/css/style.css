@@ -175,7 +175,6 @@ main { padding-block: 48px 72px; }
 .filter:hover { border-color: var(--accent); }
 .filter[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .filter-count { font-size: 0.88rem; color: var(--muted); }
-.legend { font-size: 0.88rem; color: var(--muted); }
 
 .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; counter-reset: pub; }
 .pub { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 18px; padding: 16px 0; border-top: 1px solid var(--line); }
@@ -185,7 +184,6 @@ main { padding-block: 48px 72px; }
 .pub-title { font-weight: 600; line-height: 1.4; }
 .pub-authors { font-size: 0.95rem; color: var(--muted); }
 .pub-authors .me { color: var(--ink); }
-.pub-authors .mark { color: var(--accent); }
 .pub-venue { font-size: 0.95rem; color: var(--muted); }
 .pub-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
 .doi {
@@ -242,6 +240,13 @@ a.card-media:hover .zoom, a.card-media:focus-visible .zoom { opacity: 1; }
 .plain-list { margin: 0; padding-left: 1.15em; display: grid; gap: 6px; max-width: 68ch; }
 .course-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
 .course-list li { padding: 5px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-size: 0.93rem; }
+/* Teaching page: courses and supervision under each position */
+.deflist dd .sub-label { margin: 12px 0 6px; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.deflist dd .sub-text { margin: 8px 0 0; max-width: 68ch; }
+.term-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; max-width: 40rem; }
+.term-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+.term-list li:last-child { border-bottom: 0; }
+.term-list .term { flex: none; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
 
 /* ── footer ─────────────────────────────────────────── */
 .site-footer { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--muted); font-size: 0.9rem; }
@@ -257,6 +262,7 @@ a.card-media:hover .zoom, a.card-media:focus-visible .zoom { opacity: 1; }
   .split { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
+  .term-list li { flex-direction: column; gap: 0; }
   .hero { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .portrait { width: 168px; }
   .site-header .wrap { padding-block: 10px; }

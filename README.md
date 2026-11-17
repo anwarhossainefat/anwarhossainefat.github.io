@@ -14,7 +14,7 @@ Plain HTML and CSS, with no build step. Edit a file on GitHub, commit, and the s
 | `research.html` | Current research projects and methods |
 | `publications.html` | Full publication list with topic filters |
 | `projects.html` | DeltaDraw, the germophobia game, the HPC project, SnakeGo |
-| `teaching.html` | Teaching positions, courses, supervision |
+| `teaching.html` | Positions, each with its courses and supervision; research mentoring |
 | `service.html` | Peer review, leadership, awards, research ethics, training |
 | `files/` | CV and certificates (PDF) |
 | `assets/img/` | Photo, social preview card, project images |
@@ -45,8 +45,8 @@ Find the paper's title. Two lines below it is the `pub-venue` line, followed by 
 Copy a whole `<li class="pub" ...> ... </li>` block from the right section and paste it at the top of that section. Then change:
 - `data-tags="..."` and the tag `<span>`s: use HCI, SE, XR, SEC, CV, ML, XAI, HPC
 - the title, authors and venue
-- `†` = first author, `‡` = second author
-- the counts in the stats box at the top of the page, and "All 49 publications" on `index.html`
+- the counts in the stats box at the top of the page (including first- and second-authored), and "All 49 publications" on `index.html`
+- your own name stays in bold: `<strong class="me">A.H. Efat</strong>` (no † or ‡ marks)
 
 ### Replace the CV
 Upload the new PDF into `files/` with exactly the same name: `Anwar_Hossain_Efat_CV.pdf`.

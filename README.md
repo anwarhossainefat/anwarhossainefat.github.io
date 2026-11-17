@@ -51,6 +51,9 @@ Copy a whole `<li class="pub" ...> ... </li>` block from the right section and p
 ### Replace the CV
 Upload the new PDF into `files/` with exactly the same name: `Anwar_Hossain_Efat_CV.pdf`.
 
+### After changing `assets/css/style.css`
+Every page loads the style file as `assets/css/style.css?v=2026-11-17`. Browsers keep an old copy of the style file, so after changing it, change this date in all 7 HTML files (search for `?v=`). Visitors then get the new styles straight away.
+
 ### Replace an image
 Upload the new image into the same folder with exactly the same file name.
 
